@@ -1,4 +1,10 @@
-require 'pry'
+require "bundler/inline"
+
+gemfile do
+  source "https://rubygems.org"
+  gem 'pry'
+end
+
 require "singleton"
 
 module Receptacle
