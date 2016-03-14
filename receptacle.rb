@@ -17,11 +17,11 @@ module Receptacle
     end
   end
 
-  def self.register(repository, strategy)
-    Registration.instance.receptacles[repository] = strategy
+  def self.register(receptacle, strategy)
+    Registration.instance.receptacles[receptacle] = strategy
   end
-  def self.wrappers(repository, *wrappers)
-    Registration.instance.wrappers[repository] = Array(wrappers)
+  def self.wrappers(receptacle, *wrappers)
+    Registration.instance.wrappers[receptacle] = Array(wrappers)
   end
 
   module Base
