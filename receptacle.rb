@@ -1,11 +1,11 @@
-require "bundler/inline"
+require 'bundler/inline'
 
 gemfile do
-  source "https://rubygems.org"
+  source 'https://rubygems.org'
   gem 'minitest', require: false
 end
 
-require "singleton"
+require 'singleton'
 module Receptacle
   class Registration
     include Singleton
@@ -20,6 +20,7 @@ module Receptacle
   def self.register(receptacle, strategy)
     Registration.instance.receptacles[receptacle] = strategy
   end
+
   def self.wrappers(receptacle, *wrappers)
     Registration.instance.wrappers[receptacle] = Array(wrappers)
   end
@@ -32,7 +33,7 @@ module Receptacle
       def delegate_to_strategy(method_name)
         define_singleton_method(method_name) do |*args|
           strategy = Registration.instance.receptacles.fetch(self) do
-            raise "not configured"
+            raise 'not configured'
           end
 
           with_wrappers(self, method_name, *args) do |*call_args|
@@ -40,20 +41,21 @@ module Receptacle
           end
         end
       end
-      
-      def with_wrappers(base, method_name, *args, &block)
+
+      def with_wrappers(base, method_name, *args)
         wrappers = Registration.instance.wrappers[base]
-        return block.call(*args) if wrappers.empty?
+        return yield(*args) if wrappers.empty?
 
         wrappers = wrappers.map(&:new)
         *args = before_wrapper(wrappers, method_name, *args)
-        ret = block.call(*args)
+        ret = yield(*args)
         after_wrapper(wrappers, method_name, *args, ret)
       end
 
       def before_wrapper(wrappers, method_name, *args)
         before_method_name = "before_#{method_name}"
-        before_wrapper = wrappers.select{|e| e.respond_to?(before_method_name)}
+        before_wrapper = wrappers
+                         .select { |e| e.respond_to?(before_method_name) }
         return *args if before_wrapper.empty?
 
         before_wrapper.reduce(*args) do |memo, wrapper|
@@ -63,7 +65,8 @@ module Receptacle
 
       def after_wrapper(wrappers, method_name, *args, return_value)
         after_method_name = "after_#{method_name}"
-        after_wrapper  = wrappers.select{|e| e.respond_to?(after_method_name)}.reverse
+        after_wrapper = wrappers
+                        .select { |e| e.respond_to?(after_method_name) }.reverse
         return return_value if after_wrapper.empty?
 
         after_wrapper.reduce(return_value) do |memo, wrapper|
@@ -95,13 +98,13 @@ module TestFixtures
         end
       end
       class Fake < Base
-        def where(args)
+        def where(_args)
           CallStack.instance.stack.push([self.class, __method__])
           :where
         end
       end
       class Real < Base
-        def where(args)
+        def where(_args)
           CallStack.instance.stack.push([self.class, __method__])
           :where
         end
@@ -113,7 +116,8 @@ module TestFixtures
           CallStack.instance.stack.push([self.class, __method__])
           args
         end
-        def after_where(args, return_values)
+
+        def after_where(_args, return_values)
           CallStack.instance.stack.push([self.class, __method__])
           return_values
         end
@@ -123,7 +127,8 @@ module TestFixtures
           CallStack.instance.stack.push([self.class, __method__])
           args
         end
-        def after_where(args, return_values)
+
+        def after_where(_args, return_values)
           CallStack.instance.stack.push([self.class, __method__])
           return_values
         end
@@ -139,45 +144,49 @@ describe Receptacle do
   before do
     TestFixtures::CallStack.instance.stack = []
   end
-  describe "#register" do
-    it "keeps track of Receptacle - Strategy config" do
+  describe '#register' do
+    it 'keeps track of Receptacle - Strategy config' do
       receptacle = TestFixtures::User
       strategy = TestFixtures::User::Strategy::Fake
       Receptacle.register(receptacle, strategy)
-      assert_equal Receptacle::Registration.instance.receptacles[receptacle], strategy
+      assert_equal Receptacle::Registration.instance.receptacles[receptacle],
+                   strategy
     end
 
-    it "keeps track of config after change of strategy" do
+    it 'keeps track of config after change of strategy' do
       receptacle = TestFixtures::User
       strategy = TestFixtures::User::Strategy::Fake
       Receptacle.register(receptacle, strategy)
 
       strategy = TestFixtures::User::Strategy::Real
       Receptacle.register(receptacle, strategy)
-      assert_equal Receptacle::Registration.instance.receptacles[receptacle], strategy
+      assert_equal Receptacle::Registration.instance.receptacles[receptacle],
+                   strategy
     end
   end
 
-  describe "" do
+  describe '' do
     before do
       @receptacle = TestFixtures::User
       Receptacle.register(@receptacle, TestFixtures::User::Strategy::Fake)
     end
-    it "calls wrappers correctly" do
-      Receptacle.wrappers(@receptacle, TestFixtures::User::Wrappers::First, TestFixtures::User::Wrappers::Second)
-      TestFixtures::User.where("test")
+    it 'calls wrappers correctly' do
+      Receptacle.wrappers(@receptacle,
+                          TestFixtures::User::Wrappers::First,
+                          TestFixtures::User::Wrappers::Second)
+      TestFixtures::User.where('test')
       assert_equal TestFixtures::CallStack.instance.stack,
-        [[TestFixtures::User::Wrappers::First, :before_where],
-         [TestFixtures::User::Wrappers::Second, :before_where],
-         [TestFixtures::User::Strategy::Fake, :where],
-         [TestFixtures::User::Wrappers::Second, :after_where],
-         [TestFixtures::User::Wrappers::First, :after_where]]
+                   [[TestFixtures::User::Wrappers::First, :before_where],
+                    [TestFixtures::User::Wrappers::Second, :before_where],
+                    [TestFixtures::User::Strategy::Fake, :where],
+                    [TestFixtures::User::Wrappers::Second, :after_where],
+                    [TestFixtures::User::Wrappers::First, :after_where]]
     end
-    it "has one wrapper instance per method call" do
+    it 'has one wrapper instance per method call' do
       mock = Minitest::Mock.new
       mock.expect(:new, TestFixtures::User::Wrappers::Second.new)
       Receptacle.wrappers(@receptacle, mock)
-      TestFixtures::User.where("test")
+      TestFixtures::User.where('test')
       mock.verify
     end
   end
