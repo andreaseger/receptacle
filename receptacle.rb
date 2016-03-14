@@ -2,11 +2,10 @@ require "bundler/inline"
 
 gemfile do
   source "https://rubygems.org"
-  gem 'pry'
+  gem 'minitest', require: false
 end
 
 require "singleton"
-
 module Receptacle
   class Registration
     include Singleton
@@ -75,7 +74,16 @@ module Receptacle
   end
 end
 
-module Foo
+#--------------- tests -----------------
+
+module TestFixtures
+  class CallStack
+    include Singleton
+    def initialize
+      self.stack = []
+    end
+    attr_accessor :stack
+  end
   module User
     include Receptacle::Base
     delegate_to_strategy :where
@@ -88,13 +96,13 @@ module Foo
       end
       class Fake < Base
         def where(args)
-          puts "Fake#where #{args}"
+          CallStack.instance.stack.push([self.class, __method__])
           :where
         end
       end
       class Real < Base
         def where(args)
-          puts "Real#where #{args}"
+          CallStack.instance.stack.push([self.class, __method__])
           :where
         end
       end
@@ -102,22 +110,21 @@ module Foo
     module Wrappers
       class First
         def before_where(args)
-          puts "First#before"
+          CallStack.instance.stack.push([self.class, __method__])
           args
         end
         def after_where(args, return_values)
-          puts "First#after"
+          CallStack.instance.stack.push([self.class, __method__])
           return_values
         end
       end
       class Second
         def before_where(args)
-          puts "Second#before"
-          self.state = 24
+          CallStack.instance.stack.push([self.class, __method__])
           args
         end
         def after_where(args, return_values)
-          puts "Second#after with around state: #{state}"
+          CallStack.instance.stack.push([self.class, __method__])
           return_values
         end
         attr_accessor :state
@@ -126,11 +133,52 @@ module Foo
   end
 end
 
-Receptacle.register(Foo::User, Foo::User::Strategy::Fake)
-Receptacle.wrappers(Foo::User, Foo::User::Wrappers::First, Foo::User::Wrappers::Second)
-puts Foo::User.where(123)
-puts Foo::User.clear
-puts "------------change strategy --------------"
-Receptacle.register(Foo::User, Foo::User::Strategy::Real)
-puts Foo::User.where(123)
-puts Foo::User.clear
+require 'minitest/autorun'
+
+describe Receptacle do
+  before do
+    TestFixtures::CallStack.instance.stack = []
+  end
+  describe "#register" do
+    it "keeps track of Receptacle - Strategy config" do
+      receptacle = TestFixtures::User
+      strategy = TestFixtures::User::Strategy::Fake
+      Receptacle.register(receptacle, strategy)
+      assert_equal Receptacle::Registration.instance.receptacles[receptacle], strategy
+    end
+
+    it "keeps track of config after change of strategy" do
+      receptacle = TestFixtures::User
+      strategy = TestFixtures::User::Strategy::Fake
+      Receptacle.register(receptacle, strategy)
+
+      strategy = TestFixtures::User::Strategy::Real
+      Receptacle.register(receptacle, strategy)
+      assert_equal Receptacle::Registration.instance.receptacles[receptacle], strategy
+    end
+  end
+
+  describe "" do
+    before do
+      @receptacle = TestFixtures::User
+      Receptacle.register(@receptacle, TestFixtures::User::Strategy::Fake)
+    end
+    it "calls wrappers correctly" do
+      Receptacle.wrappers(@receptacle, TestFixtures::User::Wrappers::First, TestFixtures::User::Wrappers::Second)
+      TestFixtures::User.where("test")
+      assert_equal TestFixtures::CallStack.instance.stack,
+        [[TestFixtures::User::Wrappers::First, :before_where],
+         [TestFixtures::User::Wrappers::Second, :before_where],
+         [TestFixtures::User::Strategy::Fake, :where],
+         [TestFixtures::User::Wrappers::Second, :after_where],
+         [TestFixtures::User::Wrappers::First, :after_where]]
+    end
+    it "has one wrapper instance per method call" do
+      mock = Minitest::Mock.new
+      mock.expect(:new, TestFixtures::User::Wrappers::Second.new)
+      Receptacle.wrappers(@receptacle, mock)
+      TestFixtures::User.where("test")
+      mock.verify
+    end
+  end
+end
