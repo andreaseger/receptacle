@@ -31,68 +31,70 @@ module Receptacle
     end
     module ClassMethods
       def delegate_to_strategy(method_name)
-        define_singleton_method(method_name) do |args|
+        define_singleton_method(method_name) do |*args|
           strategy = Registration.instance.receptacles.fetch(self) do
             raise "not configured"
           end
 
-          with_wrappers(self, method_name, args) do |call_args|
-            strategy.new.public_send(method_name, call_args)
+          with_wrappers(self, method_name, *args) do |*call_args|
+            strategy.new.public_send(method_name, *call_args)
           end
         end
       end
       
-      def with_wrappers(base, method_name, args, &block)
+      def with_wrappers(base, method_name, *args, &block)
         wrappers = Registration.instance.wrappers[base]
-        return block.call(args) if wrappers.empty?
+        return block.call(*args) if wrappers.empty?
 
         wrappers = wrappers.map(&:new)
-        args = before_wrapper(wrappers, method_name, args)
-        ret = around_wrapper(wrappers, method_name, args, &block)
-        after_wrapper(wrappers, method_name, args, ret)
+        *args = before_wrapper(wrappers, method_name, *args)
+        ret = block.call(*args)
+        after_wrapper(wrappers, method_name, *args, ret)
       end
 
-      def before_wrapper(wrappers, method_name, args)
+      def before_wrapper(wrappers, method_name, *args)
         before_method_name = "before_#{method_name}"
         before_wrapper = wrappers.select{|e| e.respond_to?(before_method_name)}
-        return args if before_wrapper.empty?
+        return *args if before_wrapper.empty?
 
-        before_wrapper.reduce(args) do |memo, wrapper|
+        before_wrapper.reduce(*args) do |memo, wrapper|
           wrapper.public_send(before_method_name, memo)
         end
       end
 
-      def around_wrapper(wrappers, method_name, args, &block)
-        around_method_name = "around_#{method_name}"
-        around_wrapper = wrappers.select{|e| e.respond_to?(around_method_name)}
-        return block.call(args) if around_wrapper.empty?
-
-        around_wrapper.reduce(nil) do |memo, wrapper|
-          wrapper.public_send(around_method_name, args, memo, &block)
-        end
-      end
-
-      def after_wrapper(wrappers, method_name, args, return_value)
+      def after_wrapper(wrappers, method_name, *args, return_value)
         after_method_name = "after_#{method_name}"
         after_wrapper  = wrappers.select{|e| e.respond_to?(after_method_name)}.reverse
         return return_value if after_wrapper.empty?
 
         after_wrapper.reduce(return_value) do |memo, wrapper|
-          wrapper.public_send(after_method_name, args, memo)
+          wrapper.public_send(after_method_name, *args, memo)
         end
       end
     end
   end
 end
 
-module Repo
+module Foo
   module User
     include Receptacle::Base
     delegate_to_strategy :where
+    delegate_to_strategy :clear
     module Strategy
-      class Fake
+      class Base
+        def clear
+          :clear
+        end
+      end
+      class Fake < Base
         def where(args)
           puts "Fake#where #{args}"
+          :where
+        end
+      end
+      class Real < Base
+        def where(args)
+          puts "Real#where #{args}"
           :where
         end
       end
@@ -124,8 +126,11 @@ module Repo
   end
 end
 
-Receptacle.register(Repo::User, Repo::User::Strategy::Fake)
-Receptacle.wrappers(Repo::User, Repo::User::Wrappers::First, Repo::User::Wrappers::Second)
-binding.pry
-p Repo::User.where(123)
-p 'exit'
+Receptacle.register(Foo::User, Foo::User::Strategy::Fake)
+Receptacle.wrappers(Foo::User, Foo::User::Wrappers::First, Foo::User::Wrappers::Second)
+puts Foo::User.where(123)
+puts Foo::User.clear
+puts "------------change strategy --------------"
+Receptacle.register(Foo::User, Foo::User::Strategy::Real)
+puts Foo::User.where(123)
+puts Foo::User.clear
