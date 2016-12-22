@@ -16,12 +16,12 @@ module Receptacle
 
   def self.register(receptacle, strategy:)
     Registration.instance.receptacles[receptacle] = strategy
-    clear_method_cache
+    clear_method_cache(receptacle)
   end
 
   def self.register_wrappers(receptacle, wrappers:)
     Registration.instance.wrappers[receptacle] = Array(wrappers)
-    clear_method_cache
+    clear_method_cache(receptacle)
   end
 
   def self.clear_method_cache(receptacle)
@@ -43,7 +43,7 @@ module Receptacle
 
       def method_missing(method_name, *arguments, &block)
         if Registration.instance.methods[self]&.include?(method_name)
-          print_callstack(method_name)
+          p callstack(method_name)
           define_singleton_method(method_name) do |*args, &inner_block|
             strategy = Registration.instance.receptacles.fetch(self) do
               raise 'not configured'
@@ -60,23 +60,24 @@ module Receptacle
       end
 
       def respond_to_missing?(method_name, include_private = false)
-        Registration.instance.methods[self]&.include?(method_name) || super
+        super
+        # TODO: Registration.instance.methods[self]&.include?(method_name) || super
       end
 
       CallTuple = Struct.new(:klass, :method_name)
-      def print_callstack(method_name)
+      def callstack(method_name)
         wrapper = Registration.instance.wrappers[self]
-        wrapper = wrapper&.map(&:new)
+        # not sure this is needed: wrapper = nil if wrapper&.empty?
         before_method_name = :"before_#{method_name}"
-        before_wrapper = wrapper&.select { |w| w.respond_to?(before_method_name) }
-        before_tuple = before_wrapper&.map { |bw| CallTuple.new(bw.class, before_method_name) }
+        before_wrapper = wrapper&.select { |w| w.method_defined?(before_method_name) }
+        before_tuple = before_wrapper&.map { |bw| CallTuple.new(bw, before_method_name) }
 
         after_method_name = :"after_#{method_name}"
-        after_wrapper = wrapper&.select { |w| w.respond_to?(after_method_name) }
-        after_tuple = after_wrapper&.map { |bw| CallTuple.new(bw.class, after_method_name) }
+        after_wrapper = wrapper&.select { |w| w.method_defined?(after_method_name) }
+        after_tuple = after_wrapper&.map { |aw| CallTuple.new(aw, after_method_name) }
 
         strategy_tuple = CallTuple.new(Registration.instance.receptacles.fetch(self), method_name)
-        p [before_tuple, strategy_tuple, after_tuple&.reverse].flatten.compact
+        [before_tuple, strategy_tuple, after_tuple&.reverse].flatten.compact
       end
 
       def with_wrappers(base, method_name, *input_args)
