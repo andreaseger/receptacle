@@ -3,4 +3,6 @@ Receptacle
 
 playground implementation of the repository pattern
 
-goal is to have the full code < 100 lines of code - not counting tests
+goals:
+ - < 100 lines of code - not counting tests
+ - minimal processing overhead(method dispatching should be as fast as possible)

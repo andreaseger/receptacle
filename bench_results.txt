@@ -1,0 +1,131 @@
+> ruby -v
+ruby 2.3.3p222 (2016-11-21 revision 56859) [x86_64-linux]
+> ruby bench.rb
+Resolving dependencies...
+Using benchmark-ips 2.7.2
+Using bundler 1.13.6
+:where method - all 4 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    13.769k i/100ms
+     w/ method cache    20.133k i/100ms
+Calculating -------------------------------------
+            baseline    144.760k (± 5.4%) i/s -    729.757k in   5.057883s
+     w/ method cache    211.442k (± 3.9%) i/s -      1.067M in   5.055257s
+
+Comparison:
+     w/ method cache:   211441.7 i/s
+            baseline:   144759.6 i/s - 1.46x  slower
+
+:find method - only 2 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    16.462k i/100ms
+     w/ method cache    40.675k i/100ms
+Calculating -------------------------------------
+            baseline    175.278k (± 5.6%) i/s -    888.948k in   5.090522s
+     w/ method cache    479.172k (±12.0%) i/s -      2.359M in   5.041748s
+
+Comparison:
+     w/ method cache:   479172.1 i/s
+            baseline:   175277.5 i/s - 2.73x  slower
+
+:all method - no wrapper has a wrapper method for this method
+Warming up --------------------------------------
+            baseline    18.076k i/100ms
+     w/ method cache   111.052k i/100ms
+Calculating -------------------------------------
+            baseline    199.664k (± 8.5%) i/s -    994.180k in   5.031743s
+     w/ method cache      1.442M (± 5.1%) i/s -      7.218M in   5.021555s
+
+Comparison:
+     w/ method cache:  1441656.8 i/s
+            baseline:   199664.1 i/s - 7.22x  slower
+
+> set -x JRUBY_OPS=''
+> ruby -v
+jruby 9.1.6.0 (2.3.1) 2016-11-09 0150a76 OpenJDK 64-Bit Server VM 25.112-b15 on 1.8.0_112-b15 +jit [linux-x86_64]
+> ruby bench.rb
+Fetching gem metadata from https://rubygems.org/.
+Fetching version metadata from https://rubygems.org/
+Resolving dependencies...
+Using benchmark-ips 2.7.2
+Using bundler 1.13.6
+:where method - all 4 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    16.277k i/100ms
+     w/ method cache    24.882k i/100ms
+Calculating -------------------------------------
+            baseline    202.865k (± 2.6%) i/s -      1.025M in   5.058788s
+     w/ method cache    288.028k (± 3.6%) i/s -      1.443M in   5.018784s
+
+Comparison:
+     w/ method cache:   288027.8 i/s
+            baseline:   202864.8 i/s - 1.42x  slower
+
+:find method - only 2 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    19.738k i/100ms
+     w/ method cache    40.404k i/100ms
+Calculating -------------------------------------
+            baseline    230.775k (± 3.1%) i/s -      1.165M in   5.051663s
+     w/ method cache    520.600k (± 5.5%) i/s -      2.626M in   5.062069s
+
+Comparison:
+     w/ method cache:   520599.9 i/s
+            baseline:   230775.4 i/s - 2.26x  slower
+
+:all method - no wrapper has a wrapper method for this method
+Warming up --------------------------------------
+            baseline    21.991k i/100ms
+     w/ method cache    85.886k i/100ms
+Calculating -------------------------------------
+            baseline    250.566k (± 6.7%) i/s -      1.253M in   5.029729s
+     w/ method cache      1.414M (± 6.9%) i/s -      7.043M in   5.013220s
+
+Comparison:
+     w/ method cache:  1413523.4 i/s
+            baseline:   250565.6 i/s - 5.64x  slower
+
+> set -x JRUBY_OPS='-Xcompile.invokedynamic=true'
+> ruby -v
+jruby 9.1.6.0 (2.3.1) 2016-11-09 0150a76 OpenJDK 64-Bit Server VM 25.112-b15 on 1.8.0_112-b15 +indy +jit [linux-x86_64]
+> ruby bench.rb
+Fetching gem metadata from https://rubygems.org/.
+Fetching version metadata from https://rubygems.org/
+Resolving dependencies...
+Using benchmark-ips 2.7.2
+Using bundler 1.13.6
+:where method - all 4 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    17.480k i/100ms
+     w/ method cache    28.605k i/100ms
+Calculating -------------------------------------
+            baseline    226.214k (±10.0%) i/s -      1.101M in   5.027849s
+     w/ method cache    362.280k (± 3.7%) i/s -      1.831M in   5.062194s
+
+Comparison:
+     w/ method cache:   362280.1 i/s
+            baseline:   226214.4 i/s - 1.60x  slower
+
+:find method - only 2 wrappers have at least one wrapper method
+Warming up --------------------------------------
+            baseline    22.891k i/100ms
+     w/ method cache    51.461k i/100ms
+Calculating -------------------------------------
+            baseline    277.177k (± 2.3%) i/s -      1.396M in   5.040756s
+     w/ method cache    727.842k (± 2.8%) i/s -      3.654M in   5.024380s
+
+Comparison:
+     w/ method cache:   727841.9 i/s
+            baseline:   277177.2 i/s - 2.63x  slower
+
+:all method - no wrapper has a wrapper method for this method
+Warming up --------------------------------------
+            baseline    26.515k i/100ms
+     w/ method cache   111.564k i/100ms
+Calculating -------------------------------------
+            baseline    318.926k (± 2.6%) i/s -      1.617M in   5.075326s
+     w/ method cache      1.775M (± 2.2%) i/s -      8.925M in   5.030055s
+
+Comparison:
+     w/ method cache:  1775224.2 i/s
+            baseline:   318926.0 i/s - 5.57x  slower
