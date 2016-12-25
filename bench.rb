@@ -1,9 +1,7 @@
-#!/usr/bin/env ruby
-# coding: utf-8
 # frozen_string_literal: true
 require 'bundler/inline'
 
-gemfile true do
+gemfile false do
   source 'https://rubygems.org'
   gem 'benchmark-ips'
 end
@@ -105,5 +103,15 @@ Benchmark.ips do |x|
   x.warmup = 10 if RUBY_ENGINE == 'jruby'
   x.report('baseline') { Bench.all(:foo) }
   x.report('w/ method cache') { Bench.all_cached(:foo) }
+  x.compare!
+end
+
+Receptacle.register_wrappers(Bench, wrappers: [])
+print "no wrappers configured\n"
+Benchmark.ips do |x|
+  x.warmup = 10 if RUBY_ENGINE == 'jruby'
+  x.report('baseline') { Bench.all(:foo) }
+  x.report('w/ method cache') { Bench.all_cached(:foo) }
+  # x.report("direct calls") { Bench::Strategy::Real.new.all(:foo)}
   x.compare!
 end

@@ -43,19 +43,21 @@ module Receptacle
 
     def initialize(strategy:, before_wrappers:, after_wrappers:, method_name:)
       @strategy = strategy
-      @before_wrappers = before_wrappers || []
-      @after_wrappers = after_wrappers || []
-      @wrappers = @before_wrappers | @after_wrappers
       @before_method_name = :"before_#{method_name}"
       @after_method_name = :"after_#{method_name}"
+      before_wrappers ||= []
+      after_wrappers ||= []
+      @wrappers = before_wrappers | after_wrappers
+      @skip_before_wrappers = before_wrappers.empty?
+      @skip_after_wrappers = after_wrappers.empty?
     end
 
     def skip_before_wrappers?
-      @before_wrappers.empty?
+      @skip_before_wrappers
     end
 
     def skip_after_wrappers?
-      @after_wrappers.empty?
+      @skip_after_wrappers
     end
   end
 
@@ -99,25 +101,30 @@ module Receptacle
       end
 
       def build_cached_method(method_name)
-        method_call_cache = build_method_call_cache(method_name)
-        define_singleton_method("#{method_name}_cached") do |*args, &inner_block|
-          run_wrappers(method_call_cache, *args) do |*call_args|
-            method_call_cache.strategy.new.public_send(method_name, *call_args, &inner_block)
+        method_cache = build_method_call_cache(method_name)
+        if method_cache.wrappers.nil? || method_cache.wrappers.empty?
+          define_singleton_method("#{method_name}_cached") do |*args, &inner_block|
+            method_cache.strategy.new.public_send(method_name, *args, &inner_block)
+          end
+        else
+          define_singleton_method("#{method_name}_cached") do |*args, &inner_block|
+            run_wrappers(method_cache, *args) do |*call_args|
+              method_cache.strategy.new.public_send(method_name, *call_args, &inner_block)
+            end
           end
         end
       end
 
-      def run_wrappers(method_call_cache, *input_args)
-        wrappers = method_call_cache.wrappers
-        return yield(*input_args) if wrappers.nil? || wrappers.empty?
-
-        wrappers = wrappers.map(&:new)
-        # TODO: this next line seems like a workaround
-        bw = method_call_cache.skip_before_wrappers? ? [] : wrappers
-        args = run_before_wrappers(bw, method_call_cache.before_method_name, *input_args)
+      def run_wrappers(method_cache, input_args)
+        wrappers = method_cache.wrappers.map(&:new)
+        args = if method_cache.skip_before_wrappers?
+                 input_args
+               else
+                 run_before_wrappers(wrappers, method_cache.before_method_name, input_args)
+               end
         ret = yield(args)
-        return ret if method_call_cache.skip_after_wrappers?
-        run_after_wrappers(wrappers, method_call_cache.after_method_name, args, ret)
+        return ret if method_cache.skip_after_wrappers?
+        run_after_wrappers(wrappers, method_cache.after_method_name, args, ret)
       end
 
       #-------------------------------------------------------------------------#
