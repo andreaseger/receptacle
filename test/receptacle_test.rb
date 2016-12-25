@@ -1,8 +1,6 @@
 # frozen_string_literal: true
-require './receptacle'
-require './fixture'
-
-require 'minitest/autorun'
+require "test_helper"
+require 'fixture'
 
 describe Receptacle do
   def callstack

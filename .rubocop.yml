@@ -1,0 +1,15 @@
+AllCops:
+  TargetRubyVersion: 2.3
+
+Metrics/LineLength:
+  Max: 99
+  Exclude:
+    - receptacle_test.rb
+
+Metrics/BlockLength:
+  Exclude:
+    - receptacle_test.rb
+
+
+Style/Documentation:
+  Enabled: false

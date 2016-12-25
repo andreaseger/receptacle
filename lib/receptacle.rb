@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "receptacle/version"
 require 'set'
 require 'singleton'
 module Receptacle
@@ -61,7 +62,6 @@ module Receptacle
     end
   end
 
-  CallTuple = Struct.new(:klass, :method_name)
   module Base
     def self.included(base)
       base.extend(ClassMethods)

@@ -1,3 +1,8 @@
+PATH
+  remote: .
+  specs:
+    receptacle (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -13,6 +18,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rainbow (2.1.0)
+    rake (10.5.0)
     rubocop (0.46.0)
       parser (>= 2.3.1.1, < 3.0)
       powerpack (~> 0.1)
@@ -27,9 +33,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  minitest
+  bundler (~> 1.13)
+  minitest (~> 5.0)
   pry
-  rubocop
+  rake (~> 10.0)
+  receptacle!
+  rubocop (~> 0.46)
 
 BUNDLED WITH
    1.13.6

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require './receptacle'
+require 'receptacle'
 
 module Fixtures
   class CallStack

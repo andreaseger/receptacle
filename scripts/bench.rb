@@ -4,8 +4,9 @@ require 'bundler/inline'
 gemfile false do
   source 'https://rubygems.org'
   gem 'benchmark-ips'
+  gem "receptacle", path: "./.."
 end
-require './receptacle'
+
 module Bench
   include Receptacle::Base
   delegate_to_strategy :find
