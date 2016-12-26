@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'receptacle'
+require 'singleton'
 
 module Fixtures
   class CallStack

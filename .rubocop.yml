@@ -4,11 +4,12 @@ AllCops:
 Metrics/LineLength:
   Max: 99
   Exclude:
-    - receptacle_test.rb
+    - test/*
 
 Metrics/BlockLength:
   Exclude:
-    - receptacle_test.rb
+    - '*.gemspec'
+    - test/*
 
 
 Style/Documentation:

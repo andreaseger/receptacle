@@ -8,6 +8,8 @@ GEM
   specs:
     ast (2.3.0)
     coderay (1.1.1)
+    docile (1.1.5)
+    json (2.0.2)
     method_source (0.8.2)
     minitest (5.10.1)
     parser (2.3.3.1)
@@ -26,6 +28,11 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
+    simplecov (0.12.0)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
     slop (3.6.0)
     unicode-display_width (1.1.2)
 
@@ -39,6 +46,7 @@ DEPENDENCIES
   rake (~> 10.0)
   receptacle!
   rubocop (~> 0.46)
+  simplecov
 
 BUNDLED WITH
    1.13.6

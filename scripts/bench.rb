@@ -4,7 +4,7 @@ require 'bundler/inline'
 gemfile false do
   source 'https://rubygems.org'
   gem 'benchmark-ips'
-  gem "receptacle", path: "./.."
+  gem 'receptacle', path: './..'
 end
 
 module Bench
