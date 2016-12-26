@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 module Receptacle
   class MethodCache
-    attr_reader :strategy, :wrappers, :before_method_name, :after_method_name
+    attr_reader :strategy, :wrappers, :before_method_name, :after_method_name, :method_name
 
     def initialize(strategy:, before_wrappers:, after_wrappers:, method_name:)
       @strategy = strategy
       @before_method_name = :"before_#{method_name}"
       @after_method_name = :"after_#{method_name}"
+      @method_name = method_name
       before_wrappers ||= []
       after_wrappers ||= []
       @wrappers = before_wrappers | after_wrappers

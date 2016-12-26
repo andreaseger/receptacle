@@ -185,8 +185,13 @@ describe Receptacle do
     end
 
     it 'has one wrapper instance per method call' do
-      skip("doesn't work this way in the cached calls")
       mock = Minitest::Mock.new
+      # for method_cache stuff
+      mock.expect(:method_defined?, true, [:before_where])
+      mock.expect(:method_defined?, true, [:after_where])
+      mock.expect(:hash, 1)
+      mock.expect(:hash, 1)
+      # actual expectation
       mock.expect(:new, Fixtures::User::Wrappers::Second.new)
       Receptacle.register_wrappers(receptacle, wrappers: [mock])
       Fixtures::User.where('test')

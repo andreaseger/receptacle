@@ -11,6 +11,5 @@ Metrics/BlockLength:
     - '*.gemspec'
     - test/*
 
-
 Style/Documentation:
   Enabled: false

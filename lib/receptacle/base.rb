@@ -17,8 +17,7 @@ module Receptacle
       def method_missing(method_name, *arguments, &block)
         if Registration.methods[self]&.include?(method_name)
           build_method(method_name)
-          build_cached_method(method_name)
-          public_send("#{method_name}_cached", *arguments, &block)
+          public_send(method_name, *arguments, &block)
         else
           super
         end
@@ -42,17 +41,25 @@ module Receptacle
         )
       end
 
-      def build_cached_method(method_name)
+      def build_method(method_name)
         method_cache = build_method_call_cache(method_name)
         if method_cache.wrappers.nil? || method_cache.wrappers.empty?
-          define_singleton_method("#{method_name}_cached") do |*args, &inner_block|
-            method_cache.strategy.new.public_send(method_name, *args, &inner_block)
-          end
+          define_shortcut_method(method_name, method_cache)
         else
-          define_singleton_method("#{method_name}_cached") do |*args, &inner_block|
-            run_wrappers(method_cache, *args) do |*call_args|
-              method_cache.strategy.new.public_send(method_name, *call_args, &inner_block)
-            end
+          define_full_method(method_name, method_cache)
+        end
+      end
+
+      def define_shortcut_method(method_name, method_cache)
+        define_singleton_method(method_name) do |*args, &inner_block|
+          method_cache.strategy.new.public_send(method_name, *args, &inner_block)
+        end
+      end
+
+      def define_full_method(method_name, method_cache)
+        define_singleton_method(method_name) do |*args, &inner_block|
+          run_wrappers(method_cache, *args) do |*call_args|
+            method_cache.strategy.new.public_send(method_name, *call_args, &inner_block)
           end
         end
       end
@@ -67,30 +74,6 @@ module Receptacle
         ret = yield(args)
         return ret if method_cache.skip_after_wrappers?
         run_after_wrappers(wrappers, method_cache.after_method_name, args, ret)
-      end
-
-      #-------------------------------------------------------------------------#
-
-      def build_method(method_name)
-        define_singleton_method(method_name) do |*args, &inner_block|
-          strategy = Registration.receptacles.fetch(self) do
-            raise NotConfigured
-          end
-
-          with_wrappers(self, method_name, *args) do |*call_args|
-            strategy.new.public_send(method_name, *call_args, &inner_block)
-          end
-        end
-      end
-
-      def with_wrappers(base, method_name, *input_args)
-        wrappers = Registration.wrappers[base]
-        return yield(*input_args) if wrappers.nil? || wrappers.empty?
-
-        wrappers = wrappers.map(&:new)
-        args = run_before_wrappers(wrappers, "before_#{method_name}", *input_args)
-        ret = yield(args)
-        run_after_wrappers(wrappers, "after_#{method_name}", args, ret)
       end
 
       def run_before_wrappers(wrappers, method_name, args)

@@ -18,18 +18,13 @@ module Fixtures
     delegate_to_strategy :find
     delegate_to_strategy :with
     module Strategy
-      class Base
-        def clear
-          :clear
-        end
-      end
-      class Fake < Base
+      class Fake
         def where(args)
           CallStack.instance.stack.push([self.class, __method__, args])
           :where
         end
       end
-      class Real < Base
+      class Real
         def where(args)
           CallStack.instance.stack.push([self.class, __method__, args])
           :where
