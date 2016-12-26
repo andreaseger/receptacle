@@ -1,9 +1,9 @@
 # Receptacle
 
-playground implementation of the repository pattern
+playground implementation of the repository pattern.
 
 goals:
- - < 100 lines of code - not counting tests
+ - small core codebase (currently 100 base + 26 method_cache + 41 registration + ~10 wiring)
  - minimal processing overhead(method dispatching should be as fast as possible)
 
 ## Installation
@@ -24,7 +24,52 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require "receptacle"
+
+module User
+  include Receptacle::Base
+  delegate_to_strategy :find
+  module Strategy
+    class DB
+      def find(id:)
+        # code to find from the database
+      end
+    end
+    class InMemory
+      def find(id:)
+        # code to find from inMemory store
+      end
+    end
+  end
+  module Wrapper
+    class Validator
+      def before_find(id:)
+        raise ArgumentError if id.nil?
+        {id: id}
+      end
+    end
+    class ModelMapper
+      def after_find(_args, return_value)
+        Model::User.new(return_value)
+      end
+    end
+  end
+end
+
+Receptacle.register(User, strategy: User::Strategy::DB)
+Receptacle.register_wrappers(User, wrappers: [User::Wrapper::Validator,
+                                              User::Wrapper::ModelMapper])
+
+User.find(id: 123)
+# this will call 
+# User::Wrapper::Validator#before_find
+# User::Strategy::DB#find
+# User::Wrapper::ModelMapper#after_find
+```
+If the same wrapper class implements both a `before_*` and `after_*` for the same method
+the wrapper instance is shared between both calls, making it possible to share state between
+both calls.
 
 ## Development
 
