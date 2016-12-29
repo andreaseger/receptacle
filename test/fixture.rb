@@ -13,10 +13,11 @@ module Fixtures
 
   module User
     include Receptacle::Base
-    delegate_to_strategy :where
-    delegate_to_strategy :clear
-    delegate_to_strategy :find
-    delegate_to_strategy :with
+    mediate :where
+    mediate :clear
+    mediate :find
+    mediate :with
+
     module Strategy
       class Fake
         def where(args)

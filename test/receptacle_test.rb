@@ -13,31 +13,31 @@ describe Receptacle do
   end
 
   before do
-    Receptacle::Registration.receptacles.delete(receptacle)
-    Receptacle::Registration.wrappers.delete(receptacle)
+    Receptacle::Registration.repos[receptacle].strategy = nil
+    Receptacle::Registration.repos[receptacle].wrappers = []
     Receptacle::Registration.clear_method_cache(receptacle)
     Fixtures::CallStack.instance.stack = []
   end
 
   it 'keeps track of Receptacle - Strategy config' do
     strategy = Fixtures::User::Strategy::Fake
-    Receptacle.register(receptacle, strategy: strategy)
-    assert_equal strategy, Receptacle::Registration.receptacles[receptacle]
+    receptacle.strategy strategy
+    assert_equal strategy, Receptacle::Registration.repos[receptacle].strategy
   end
 
   it 'keeps track of config after change of strategy' do
     strategy = Fixtures::User::Strategy::Fake
-    Receptacle.register(receptacle, strategy: strategy)
+    receptacle.strategy strategy
 
     strategy = Fixtures::User::Strategy::Real
-    Receptacle.register(receptacle, strategy: strategy)
-    assert_equal strategy, Receptacle::Registration.receptacles[receptacle]
+    receptacle.strategy strategy
+    assert_equal strategy, Receptacle::Registration.repos[receptacle].strategy
   end
 
   it 'keeps track of wrappers' do
     wrapper = Minitest::Mock.new
-    Receptacle.register_wrappers(receptacle, wrappers: [wrapper])
-    assert_equal [wrapper], Receptacle::Registration.wrappers[receptacle]
+    receptacle.wrappers wrapper
+    assert_equal [wrapper], Receptacle::Registration.repos[receptacle].wrappers
   end
 
   it 'responds to delegated methods' do
@@ -45,29 +45,29 @@ describe Receptacle do
   end
 
   it 'raises error if no strategy registered' do
-    assert_raises(Receptacle::NotConfigured) do
+    assert_raises(Receptacle::Errors::NotConfigured) do
       receptacle.where('test')
     end
   end
 
   it 'has methods defined' do
-    Receptacle.register(receptacle, strategy: Fixtures::User::Strategy::Real)
+    receptacle.strategy Fixtures::User::Strategy::Real
     assert_equal :where, receptacle.where('test')
     assert_raises(NoMethodError) { receptacle.foo }
   end
 
   describe 'argument passing' do
     before do
-      Receptacle.register(receptacle, strategy: Fixtures::User::Strategy::Real)
+      receptacle.strategy Fixtures::User::Strategy::Real
     end
 
-    it 'can supports plain argument' do
+    it 'supports plain argument' do
       receptacle.where('test')
       assert_equal [[Fixtures::User::Strategy::Real, :where, 'test']], callstack
     end
 
-    it 'can supports plain argument through wrapper' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::ArgumentPasser])
+    it 'supports argument through wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::ArgumentPasser]
       receptacle.where('test')
       assert_equal [
         [Fixtures::User::Wrappers::ArgumentPasser, :before_where],
@@ -75,13 +75,13 @@ describe Receptacle do
       ], callstack
     end
 
-    it 'can supports array as argument' do
+    it 'supports array as argument' do
       receptacle.where(['test'])
       assert_equal [[Fixtures::User::Strategy::Real, :where, ['test']]], callstack
     end
 
-    it 'can supports array argument through wrapper' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::ArgumentPasser])
+    it 'supports array argument through wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::ArgumentPasser]
       receptacle.where(['test'])
       assert_equal [
         [Fixtures::User::Wrappers::ArgumentPasser, :before_where],
@@ -89,15 +89,15 @@ describe Receptacle do
       ], callstack
     end
 
-    it 'can supports kwargs' do
+    it 'supports kwargs' do
       receptacle.find(foo: 'test', bar: 56)
       assert_equal [
         [Fixtures::User::Strategy::Real, :find, { foo: 'test', bar: 56 }]
       ], callstack
     end
 
-    it 'can supports kwargs through wrapper' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::ArgumentPasser])
+    it 'supports kwargs through wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::ArgumentPasser]
       receptacle.find(foo: 'test', bar: 56)
       assert_equal [
         [Fixtures::User::Wrappers::ArgumentPasser, :before_find],
@@ -105,15 +105,15 @@ describe Receptacle do
       ], callstack
     end
 
-    it 'can support blocks' do
+    it 'supports blocks' do
       assert_equal 'test_in_block', receptacle.with(context: 'test') { |c| "#{c}_in_block" }
       assert_equal [
         [Fixtures::User::Strategy::Real, :with, 'test']
       ], callstack
     end
 
-    it 'can support blocks with wrappers' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::ArgumentPasser])
+    it 'supports blocks with wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::ArgumentPasser]
       assert_equal 'test_in_block', receptacle.with('test') { |c| "#{c}_in_block" }
       assert_equal [
         [Fixtures::User::Wrappers::ArgumentPasser, :before_with],
@@ -124,17 +124,17 @@ describe Receptacle do
 
   describe 'call order' do
     before do
-      Receptacle.register(receptacle, strategy: Fixtures::User::Strategy::Fake)
+      receptacle.strategy Fixtures::User::Strategy::Fake
     end
 
-    it 'wrapper set to empty array' do
-      Receptacle.register_wrappers(receptacle, wrappers: [])
+    it 'wrappers set to empty array' do
+      receptacle.wrappers []
       receptacle.where('test')
       assert_equal [[Fixtures::User::Strategy::Fake, :where, 'test']], callstack
     end
 
-    it 'has only before wrapper' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::ArgumentPasser])
+    it 'has only before wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::ArgumentPasser]
       receptacle.where('test')
       assert_equal [
         [Fixtures::User::Wrappers::ArgumentPasser, :before_where],
@@ -142,8 +142,8 @@ describe Receptacle do
       ], callstack
     end
 
-    it 'has only after wrapper' do
-      Receptacle.register_wrappers(receptacle, wrappers: [Fixtures::User::Wrappers::LogResults])
+    it 'has only after wrappers' do
+      receptacle.wrappers [Fixtures::User::Wrappers::LogResults]
       receptacle.where('test')
       assert_equal [
         [Fixtures::User::Strategy::Fake, :where, 'test'],
@@ -152,9 +152,7 @@ describe Receptacle do
     end
 
     it 'calls wrappers correctly' do
-      Receptacle.register_wrappers(receptacle, wrappers:
-                                         [Fixtures::User::Wrappers::First,
-                                          Fixtures::User::Wrappers::Second])
+      receptacle.wrappers [Fixtures::User::Wrappers::First, Fixtures::User::Wrappers::Second]
       receptacle.where('test')
       assert_equal [[Fixtures::User::Wrappers::First, :before_where],
                     [Fixtures::User::Wrappers::Second, :before_where],
@@ -163,10 +161,8 @@ describe Receptacle do
                     [Fixtures::User::Wrappers::First, :after_where]], callstack
     end
 
-    it 'calls correct wrapper and strategy after switching' do
-      Receptacle.register_wrappers(receptacle, wrappers:
-                                                 [Fixtures::User::Wrappers::First,
-                                                  Fixtures::User::Wrappers::Second])
+    it 'calls correct wrappers and strategy after switching' do
+      receptacle.wrappers [Fixtures::User::Wrappers::First, Fixtures::User::Wrappers::Second]
       receptacle.where('test')
       assert_equal [[Fixtures::User::Wrappers::First, :before_where],
                     [Fixtures::User::Wrappers::Second, :before_where],
@@ -175,16 +171,15 @@ describe Receptacle do
                     [Fixtures::User::Wrappers::First, :after_where]], callstack
       Fixtures::CallStack.instance.stack = []
 
-      Receptacle.register(receptacle, strategy: Fixtures::User::Strategy::Real)
-      Receptacle.register_wrappers(receptacle, wrappers:
-                                                 [Fixtures::User::Wrappers::First])
+      receptacle.strategy Fixtures::User::Strategy::Real
+      receptacle.wrappers [Fixtures::User::Wrappers::First]
       receptacle.where('test')
       assert_equal [[Fixtures::User::Wrappers::First, :before_where],
                     [Fixtures::User::Strategy::Real, :where, 'test'],
                     [Fixtures::User::Wrappers::First, :after_where]], callstack
     end
 
-    it 'has one wrapper instance per method call' do
+    it 'has one wrappers instance per method call' do
       mock = Minitest::Mock.new
       # for method_cache stuff
       mock.expect(:method_defined?, true, [:before_where])
@@ -193,8 +188,8 @@ describe Receptacle do
       mock.expect(:hash, 1)
       # actual expectation
       mock.expect(:new, Fixtures::User::Wrappers::Second.new)
-      Receptacle.register_wrappers(receptacle, wrappers: [mock])
-      Fixtures::User.where('test')
+      receptacle.wrappers mock
+      receptacle.where('test')
       mock.verify
     end
   end
