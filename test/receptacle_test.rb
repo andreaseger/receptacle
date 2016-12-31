@@ -19,10 +19,32 @@ describe Receptacle do
     Fixtures::CallStack.instance.stack = []
   end
 
+  it 'provides a dsl' do
+    mod = Module.new
+    mod.include(Receptacle::Base)
+    assert mod.respond_to?(:strategy)
+    assert mod.respond_to?(:mediate)
+    assert mod.respond_to?(:wrappers)
+  end
+
+  it "allows defining new methods to mediate" do
+    mod = Module.new
+    mod.include(Receptacle::Base)
+    refute mod.respond_to?(:some_method)
+    mod.mediate(:some_method)
+    assert mod.respond_to?(:some_method)
+
+    # error for reserved method names
+    %i(wrappers strategy mediate).each do |method_name|
+      assert_raises(Receptacle::Errors::ReservedMethodName){ mod.mediate(method_name) }
+    end
+  end
+
   it 'keeps track of Receptacle - Strategy config' do
     strategy = Fixtures::User::Strategy::Fake
     receptacle.strategy strategy
     assert_equal strategy, Receptacle::Registration.repos[receptacle].strategy
+    assert_equal strategy, receptacle.strategy
   end
 
   it 'keeps track of config after change of strategy' do
@@ -38,6 +60,11 @@ describe Receptacle do
     wrapper = Minitest::Mock.new
     receptacle.wrappers wrapper
     assert_equal [wrapper], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [wrapper], receptacle.wrappers
+
+    receptacle.wrappers [wrapper]
+    assert_equal [wrapper], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [wrapper], receptacle.wrappers
   end
 
   it 'responds to delegated methods' do

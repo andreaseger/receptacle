@@ -4,7 +4,7 @@ require 'receptacle/base/method_delegation'
 require 'receptacle/errors'
 
 module Receptacle
-  RESERVED_METHOD_NAMES = Set.new(%i(wrapper mediate strategy))
+  RESERVED_METHOD_NAMES = Set.new(%i(wrappers mediate strategy))
   module Base
     def self.included(base)
       base.extend(ClassMethods)
