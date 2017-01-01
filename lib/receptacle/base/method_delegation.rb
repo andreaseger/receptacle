@@ -69,21 +69,19 @@ module Receptacle
       end
 
       def __run_before_wrappers(wrappers, method_name, args)
-        before_wrappers = wrappers
-                          .select { |w| w.respond_to?(method_name) }
-
-        before_wrappers.reduce(args) do |memo, wrapper|
-          wrapper.public_send(method_name, memo)
+        wrappers.each do |wrapper|
+          next unless wrapper.respond_to?(method_name)
+          args = wrapper.public_send(method_name, args)
         end
+        args
       end
 
       def __run_after_wrappers(wrappers, method_name, args, return_value)
-        after_wrappers = wrappers
-                         .select { |w| w.respond_to?(method_name) }
-
-        after_wrappers.reverse.reduce(return_value) do |memo, wrapper|
-          wrapper.public_send(method_name, args, memo)
+        wrappers.reverse_each do |wrapper|
+          next unless wrapper.respond_to?(method_name)
+          return_value = wrapper.public_send(method_name, return_value, args)
         end
+        return_value
       end
     end
   end
