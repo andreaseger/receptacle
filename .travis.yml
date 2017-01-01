@@ -1,0 +1,25 @@
+language: ruby
+rvm:
+  - 2.2
+  - 2.4
+  - jruby-9.1.5.0
+jdk:
+  - oraclejdk8
+  # - openjdk7
+env:
+  - "JRUBY_OPTS=''"
+  - "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
+matrix:
+  exclude:
+    - rvm: 2.2
+      jdk: oraclejdk8
+      env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
+    - rvm: 2.4
+      jdk: oraclejdk8
+      env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
+    # - rvm: 2.2
+    #   jdk: openjdk7
+    #   env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
+    # - rvm: 2.4
+    #   jdk: openjdk7
+    #   env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
