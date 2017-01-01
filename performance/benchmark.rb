@@ -7,53 +7,40 @@ gemfile false do
   gem 'receptacle', path: './..'
 end
 
-require_relative "user_receptacle"
+require_relative 'speed_receptacle'
 
-User.strategy(User::Strategy::Real)
-User.wrappers [User::Wrappers::First,
-                User::Wrappers::Second,
-                User::Wrappers::ArgumentPasser,
-                User::Wrappers::LogResults
+Speed.strategy(Speed::Strategy::One)
+Speed.wrappers [Speed::Wrappers::W1,
+                Speed::Wrappers::W2,
+                Speed::Wrappers::W3,
+                Speed::Wrappers::W4,
+                Speed::Wrappers::W5,
+                Speed::Wrappers::W6
                ]
 
-# print ":where method - all 4 wrappers have at least one wrapper method\n"
-# Benchmark.ips do |x|
-#   x.warmup = 10 if RUBY_ENGINE == 'jruby'
-#   x.report('baseline') { User.where(:foo) }
-#   x.report('w/ method proc') { User.where_cached(:foo) }
-#   x.compare!
-# end
-
-# print ":find method - only 2 wrappers have at least one wrapper method\n"
-# Benchmark.ips do |x|
-#   x.warmup = 10 if RUBY_ENGINE == 'jruby'
-#   x.report('baseline') { User.find(:foo) }
-#   x.report('direct call') do
-#     User::Strategy::Real.new.public_send(:all,
-#                                    User::Wrappers::LogResults.new.before_find(
-#                                      User::Wrappers::ArgumentPasser.new.before_find(:foo)))
-#   end
-#   x.compare!
-# end
-
-# print ":all method - no wrapper has a wrapper method for this method\n"
-# Benchmark.ips do |x|
-#   x.warmup = 10 if RUBY_ENGINE == 'jruby'
-#   x.report('baseline') { User.all(:foo) }
-#   x.report('direct call') { User::Strategy::Real.new.public_send(:all, :foo)}
-#   x.compare!
-# end
-
-User.wrappers []
-print "no wrappers configured\n"
+print "w/ wrappers"
 Benchmark.ips do |x|
   x.warmup = 10 if RUBY_ENGINE == 'jruby'
-  # x.report('baseline') { User.all(:foo) }
-  x.report("public_send") { User::Strategy::Real.new.public_send(:all, :foo) }
-  x.report("via method") do
-    m = User::Strategy::Real.new.method(:all)
+  x.report("a: 1x around, 1x before, 1x after") { Speed.a(1) }
+  x.report("b: 1x around, 1x before, 1x after") { Speed.b(1) }
+  x.report("c: 1x before, 1x after") { Speed.c(1) }
+  x.report("d: 1x after") { Speed.d(1) }
+  x.report("e: 1x before") { Speed.e(1) }
+  x.report("f: 1x around") { Speed.f(1) }
+  x.report("g: no wrappers") { Speed.g(1) }
+  x.compare!
+end
+
+Speed.wrappers []
+print "method dispatching w/ wrappers"
+Benchmark.ips do |x|
+  x.warmup = 10 if RUBY_ENGINE == 'jruby'
+  x.report('via receptacle') { Speed.a(:foo) }
+  x.report("direct via public_send") { Speed::Strategy::One.new.public_send(:a, :foo) }
+  x.report("direct via method-method") do
+    m = Speed::Strategy::One.new.method(:a)
     m.call(:foo)
   end
-  x.report("direct call") { User::Strategy::Real.new.all(:foo) }
+  x.report("direct method-call") { Speed::Strategy::One.new.a(:foo) }
   x.compare!
 end
