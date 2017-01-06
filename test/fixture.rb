@@ -11,87 +11,159 @@ module Fixtures
     attr_accessor :stack
   end
 
-  module User
+  module Test
     include Receptacle::Base
-    delegate_to_strategy :where
-    delegate_to_strategy :clear
-    delegate_to_strategy :find
-    delegate_to_strategy :with
-    module Strategy
-      class Fake
-        def where(args)
-          CallStack.instance.stack.push([self.class, __method__, args])
-          :where
-        end
+    mediate :a
+    mediate :b
+    mediate :c
+    mediate :d
+  end
+
+  module Strategy
+    class One
+      def a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number
       end
-      class Real
-        def where(args)
-          CallStack.instance.stack.push([self.class, __method__, args])
-          :where
-        end
 
-        def find(**kwargs)
-          CallStack.instance.stack.push([self.class, __method__, kwargs])
-          :find
-        end
+      def b(array)
+        CallStack.instance.stack.push([self.class, __method__, array])
+        array.sum
+      end
 
-        def with(context:)
-          CallStack.instance.stack.push([self.class, __method__, context])
-          yield(context)
-        end
+      def c(string:)
+        CallStack.instance.stack.push([self.class, __method__, string])
+        string.upcase
+      end
+
+      def d(context:)
+        CallStack.instance.stack.push([self.class, __method__, context])
+        yield(context)
       end
     end
-    module Wrappers
-      class First
-        def before_where(args)
-          CallStack.instance.stack.push([self.class, __method__])
-          args
-        end
-
-        def after_where(_args, return_values)
-          CallStack.instance.stack.push([self.class, __method__])
-          return_values
-        end
+    class Two < One
+      def a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number * 2
       end
-      class Second
-        def before_where(args)
-          CallStack.instance.stack.push([self.class, __method__])
-          args
-        end
+    end
+  end
 
-        def after_where(_args, return_values)
-          CallStack.instance.stack.push([self.class, __method__])
-          return_values
-        end
-        attr_accessor :state
+  module Wrapper
+    class BeforeAfterA
+      def before_a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number + 5
       end
-      class ArgumentPasser
-        def before_where(args)
-          CallStack.instance.stack.push([self.class, __method__])
-          args
-        end
 
-        def before_find(**kwargs)
-          CallStack.instance.stack.push([self.class, __method__])
-          kwargs
-        end
-
-        def before_with(context)
-          CallStack.instance.stack.push([self.class, __method__])
-          { context: context }
-        end
-
-        def after_meh; end
+      def after_a(return_value, number)
+        CallStack.instance.stack.push([self.class, __method__, number, return_value])
+        return_value + 5
       end
-      class LogResults
-        def before_find(args)
-          args
-        end
+    end
 
-        def after_where(_, return_values)
-          CallStack.instance.stack.push([self.class, __method__, return_values])
-          return_values
-        end
+    class BeforeAfterAandB
+      # :a
+      def before_a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number + 10
+      end
+
+      def after_a(return_value, number)
+        CallStack.instance.stack.push([self.class, __method__, number, return_value])
+        return_value + 10
+      end
+
+      # :b
+      def before_b(array)
+        CallStack.instance.stack.push([self.class, __method__, array])
+        array | [66]
+      end
+
+      def after_b(return_value, array)
+        CallStack.instance.stack.push([self.class, __method__, array, return_value])
+        return_value + 10
+      end
+    end
+
+    class BeforeAfterWithStateC
+      # :c
+      def before_c(string:)
+        CallStack.instance.stack.push([self.class, __method__, string])
+        @state = string.length
+        { string: string + '_wat' }
+      end
+
+      # :c
+      def after_c(return_value, string:)
+        CallStack.instance.stack.push([self.class, __method__, string, return_value])
+        return_value + @state.to_s
+      end
+    end
+
+    class BeforeAandC
+      # :a
+      def before_a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number + 10
+      end
+
+      # :c
+      def before_c(string:)
+        CallStack.instance.stack.push([self.class, __method__, string])
+        { string: string + '_foo' }
+      end
+    end
+
+    class BeforeAll
+      # :a
+      def before_a(number)
+        CallStack.instance.stack.push([self.class, __method__, number])
+        number + 50
+      end
+
+      # :a
+      def before_b(array)
+        CallStack.instance.stack.push([self.class, __method__, array])
+        array | [33]
+      end
+
+      # :c
+      def before_c(string:)
+        CallStack.instance.stack.push([self.class, __method__, string])
+        { string: string + '_bar' }
+      end
+
+      # :d
+      def before_d(context:)
+        CallStack.instance.stack.push([self.class, __method__, context])
+        { context: context + '_bar' }
+      end
+    end
+
+    class AfterAll
+      # :a
+      def after_a(return_value, number)
+        CallStack.instance.stack.push([self.class, __method__, number, return_value])
+        return_value + 100
+      end
+
+      # :a
+      def after_b(return_value, array)
+        CallStack.instance.stack.push([self.class, __method__, array, return_value])
+        return_value + 100
+      end
+
+      # :c
+      def after_c(return_value, string:)
+        CallStack.instance.stack.push([self.class, __method__, string, return_value])
+        return_value + '_foobar'
+      end
+
+      # :d
+      def after_d(return_value, context:)
+        CallStack.instance.stack.push([self.class, __method__, context, return_value])
+        return_value + '_foobar'
       end
     end
   end
