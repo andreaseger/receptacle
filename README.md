@@ -1,9 +1,15 @@
 # Receptacle
 
-playground implementation of the repository pattern.
+Provides easy and fast means to use the repository pattern for parts of your
+codebase. E.g. database calls can be masked behind a repository and leave
+implementation of the actuall access to a specific strategy. For external
+dependencies a second stratgy which gets switch in for local tests lets your
+application be agnostic about where or how the data is garthered as the
+interface and observed functionality stays the same between strategies.
 
-goals:
- - small core codebase (currently 100 base + 26 method_cache + 41 registration + ~10 wiring)
+## Goals of this implementation
+
+- small core codebase
  - minimal processing overhead(method dispatching should be as fast as possible)
 
 ## Installation
@@ -57,9 +63,8 @@ module User
   end
 end
 
-Receptacle.register(User, strategy: User::Strategy::DB)
-Receptacle.register_wrappers(User, wrappers: [User::Wrapper::Validator,
-                                              User::Wrapper::ModelMapper])
+User.strategy User::Strategy::DB
+User.wrappers [User::Wrapper::Validator, User::Wrapper::ModelMapper])
 
 User.find(id: 123)
 # this will call 
@@ -67,22 +72,37 @@ User.find(id: 123)
 # User::Strategy::DB#find
 # User::Wrapper::ModelMapper#after_find
 ```
-If the same wrapper class implements both a `before_*` and `after_*` for the same method
-the wrapper instance is shared between both calls, making it possible to share state between
-both calls.
+
+If the same wrapper class implements both a `before_*` and `after_*` for the
+same method the wrapper instance is shared between both calls, making it
+possible to share state between both calls.
+
+## ToDo
+
+- improve readme on why and how to use it
+- add examples (wrappers? switching strategies, use for testing)
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run
+`rake test` to run the tests. You can also run `bin/console` for an interactive
+prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To
+release a new version, update the version number in `version.rb`, and then run
+`bundle exec rake release`, which will create a git tag for the version, push
+git commits and tags, and push the `.gem` file
+to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/receptacle. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/ane/receptacle. This project is intended to be a safe,
+welcoming space for collaboration, and contributors are expected to adhere to
+the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of
+the [MIT License](http://opensource.org/licenses/MIT).
 
