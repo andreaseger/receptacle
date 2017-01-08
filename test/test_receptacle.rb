@@ -17,8 +17,8 @@ class ReceptacleTest < Minitest::Test
   end
 
   def setup
-    Receptacle::Registration.repos[receptacle].strategy = nil
-    Receptacle::Registration.repos[receptacle].wrappers = []
+    Receptacle::Registration.repositories[receptacle].strategy = nil
+    Receptacle::Registration.repositories[receptacle].wrappers = []
     Receptacle::Registration.clear_method_cache(receptacle)
     clear_callstack
   end
@@ -47,30 +47,30 @@ class ReceptacleTest < Minitest::Test
   def test_store_strategy_setup
     strategy = Fixtures::Strategy::One
     receptacle.strategy strategy
-    assert_equal strategy, Receptacle::Registration.repos[receptacle].strategy
+    assert_equal strategy, Receptacle::Registration.repositories[receptacle].strategy
     assert_equal strategy, receptacle.strategy
 
     strategy = Fixtures::Strategy::Two
     receptacle.strategy strategy
-    assert_equal strategy, Receptacle::Registration.repos[receptacle].strategy
+    assert_equal strategy, Receptacle::Registration.repositories[receptacle].strategy
   end
 
   def test_store_wrappers_setup
     assert_equal [], receptacle.wrappers
-    assert_equal [], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [], Receptacle::Registration.repositories[receptacle].wrappers
 
     wrapper = Minitest::Mock.new
     receptacle.wrappers wrapper
-    assert_equal [wrapper], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [wrapper], Receptacle::Registration.repositories[receptacle].wrappers
     assert_equal [wrapper], receptacle.wrappers
 
     receptacle.wrappers [wrapper]
-    assert_equal [wrapper], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [wrapper], Receptacle::Registration.repositories[receptacle].wrappers
     assert_equal [wrapper], receptacle.wrappers
 
     receptacle.wrappers []
     assert_equal [], receptacle.wrappers
-    assert_equal [], Receptacle::Registration.repos[receptacle].wrappers
+    assert_equal [], Receptacle::Registration.repositories[receptacle].wrappers
   end
 
   def test_missing_strategy_setup

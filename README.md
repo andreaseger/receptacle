@@ -33,44 +33,46 @@ Or install it yourself as:
 ```ruby
 require "receptacle"
 
-module User
-  include Receptacle::Base
-  delegate_to_strategy :find
-  module Strategy
-    class DB
-      def find(id:)
-        # code to find from the database
+module Repository
+  module User
+    include Receptacle::Base
+    delegate_to_strategy :find
+    module Strategy
+      class DB
+        def find(id:)
+          # code to find from the database
+        end
+      end
+      class InMemory
+        def find(id:)
+          # code to find from inMemory store
+        end
       end
     end
-    class InMemory
-      def find(id:)
-        # code to find from inMemory store
+    module Wrapper
+      class Validator
+        def before_find(id:)
+          raise ArgumentError if id.nil?
+          {id: id}
+        end
       end
-    end
-  end
-  module Wrapper
-    class Validator
-      def before_find(id:)
-        raise ArgumentError if id.nil?
-        {id: id}
-      end
-    end
-    class ModelMapper
-      def after_find(_args, return_value)
-        Model::User.new(return_value)
+      class ModelMapper
+        def after_find(return_value, **_kwargs)
+          Model::User.new(return_value)
+        end
       end
     end
   end
 end
 
-User.strategy User::Strategy::DB
-User.wrappers [User::Wrapper::Validator, User::Wrapper::ModelMapper])
+Repository::User.strategy Repository::User::Strategy::DB
+Repository::User.wrappers [Repository::User::Wrapper::Validator, Repository::User::Wrapper::ModelMapper])
 
-User.find(id: 123)
-# this will call 
-# User::Wrapper::Validator#before_find
-# User::Strategy::DB#find
-# User::Wrapper::ModelMapper#after_find
+Repository::User.find(id: 123)
+# this will basically do the following
+# args = Repository::User::Wrapper::Validator.new.before_find(id: 123)
+# return_value = Repository::User::Strategy::DB.new.find(args)
+# return_value = Repository::User::Wrapper::ModelMapper.new.after_find(return_value, args)
 ```
 
 If the same wrapper class implements both a `before_*` and `after_*` for the

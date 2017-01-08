@@ -5,7 +5,7 @@ module Receptacle
       attr_reader :repo
       def initialize(repo:)
         @repo = repo
-        super(repo.to_s)
+        super("Missing Configuration for repository: <#{repo}>")
       end
     end
     class ReservedMethodName < StandardError; end
