@@ -3,14 +3,14 @@
 Provides easy and fast means to use the repository pattern for parts of your
 codebase. E.g. database calls can be masked behind a repository and leave
 implementation of the actuall access to a specific strategy. For external
-dependencies a second stratgy which gets switch in for local tests lets your
+dependencies a second strategy which gets switch in for local tests lets your
 application be agnostic about where or how the data is garthered as the
 interface and observed functionality stays the same between strategies.
 
 ## Goals of this implementation
 
 - small core codebase
- - minimal processing overhead(method dispatching should be as fast as possible)
+- minimal processing overhead(method dispatching should be as fast as possible)
 
 ## Installation
 
@@ -66,7 +66,8 @@ module Repository
 end
 
 Repository::User.strategy Repository::User::Strategy::DB
-Repository::User.wrappers [Repository::User::Wrapper::Validator, Repository::User::Wrapper::ModelMapper])
+Repository::User.wrappers [Repository::User::Wrapper::Validator,
+                           Repository::User::Wrapper::ModelMapper])
 
 Repository::User.find(id: 123)
 # this will basically do the following
