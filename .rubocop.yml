@@ -13,9 +13,11 @@ Metrics/BlockLength:
 Metrics/AbcSize:
   Exclude:
     - test/*
+
 Metrics/ClassLength:
   Exclude:
     - test/*
+
 Metrics/MethodLength:
   Exclude:
     - test/*

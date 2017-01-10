@@ -28,7 +28,7 @@ module Fixtures
 
       def b(array)
         CallStack.instance.stack.push([self.class, __method__, array])
-        array.sum
+        array.reduce(:+)
       end
 
       def c(string:)

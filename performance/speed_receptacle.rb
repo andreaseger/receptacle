@@ -47,13 +47,16 @@ module Speed
       def before_a(args)
         args
       end
+
       def after_a(return_values, _)
         return_values
       end
+
       # :b
       def before_b(args)
         args
       end
+
       def after_b(return_values, _)
         return_values
       end
@@ -62,6 +65,7 @@ module Speed
       def before_a(args)
         args
       end
+
       def before_c(args)
         args
       end
@@ -71,6 +75,7 @@ module Speed
       def after_a(return_values, _)
         return_values
       end
+
       def after_d(return_value, _)
         return_value
       end
@@ -80,6 +85,7 @@ module Speed
       def before_b(args)
         args
       end
+
       def after_c(return_value, _)
         return_value
       end
