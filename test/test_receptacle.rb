@@ -37,9 +37,22 @@ class ReceptacleTest < Minitest::Test
     refute mod.respond_to?(:some_method)
     mod.mediate(:some_method)
     assert mod.respond_to?(:some_method)
+  end
+
+  def test_define_methods_via_delegate_to_strategy
+    mod = Module.new
+    mod.include(Receptacle::Base)
+    refute mod.respond_to?(:some_method)
+    mod.delegate_to_strategy(:some_method)
+    assert mod.respond_to?(:some_method)
+  end
+
+  def test_reserved_method_names
+    mod = Module.new
+    mod.include(Receptacle::Base)
 
     # error for reserved method names
-    %i(wrappers strategy mediate).each do |method_name|
+    %i(wrappers strategy mediate delegate_to_strategy).each do |method_name|
       assert_raises(Receptacle::Errors::ReservedMethodName) { mod.mediate(method_name) }
     end
   end

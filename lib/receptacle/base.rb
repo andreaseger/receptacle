@@ -4,7 +4,7 @@ require 'receptacle/method_delegation'
 require 'receptacle/errors'
 
 module Receptacle
-  RESERVED_METHOD_NAMES = Set.new(%i(wrappers mediate strategy))
+  RESERVED_METHOD_NAMES = Set.new(%i(wrappers mediate strategy delegate_to_strategy))
   module Base
     def self.included(base)
       base.extend(ClassMethods)
@@ -18,6 +18,7 @@ module Receptacle
         raise Errors::ReservedMethodName if Receptacle::RESERVED_METHOD_NAMES.include?(method_name)
         Registration.repositories[self].methods << method_name
       end
+      alias delegate_to_strategy mediate
 
       # get or sets the strategy
       #

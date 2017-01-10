@@ -20,14 +20,13 @@ Speed.wrappers [Speed::Wrappers::W1,
 print 'w/ wrappers'
 Benchmark.ips do |x|
   x.warmup = 10 if RUBY_ENGINE == 'jruby'
-  x.report('a: 1x around, 1x before, 1x after') { Speed.a(1) }
+  x.report('a: 2x around, 1x before, 1x after') { Speed.a(1) }
   x.report('b: 1x around, 1x before, 1x after') { Speed.b(1) }
   x.report('c: 1x before, 1x after') { Speed.c(1) }
   x.report('d: 1x after') { Speed.d(1) }
   x.report('e: 1x before') { Speed.e(1) }
   x.report('f: 1x around') { Speed.f(1) }
   x.report('g: no wrappers') { Speed.g(1) }
-  x.compare!
 end
 
 Speed.wrappers []

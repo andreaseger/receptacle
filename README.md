@@ -36,7 +36,7 @@ require "receptacle"
 module Repository
   module User
     include Receptacle::Base
-    delegate_to_strategy :find
+    mediate :find
     module Strategy
       class DB
         def find(id:)
@@ -100,7 +100,7 @@ to [rubygems.org](https://rubygems.org).
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/ane/receptacle. This project is intended to be a safe,
+https://github.com/andreaseger/receptacle. This project is intended to be a safe,
 welcoming space for collaboration, and contributors are expected to adhere to
 the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
