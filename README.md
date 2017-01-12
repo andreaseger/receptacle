@@ -3,8 +3,6 @@
 Provides easy and fast means to use the repository pattern to create separation
 between your business logic and your data source.
 
-
-
 ## Repository Pattern
 
 ### Motivation
