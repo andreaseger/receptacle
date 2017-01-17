@@ -1,9 +1,153 @@
 # Receptacle
 
+## About
+
 Provides easy and fast means to use the repository pattern to create separation
-between your business logic and your data source.
+between your business logic and your data sources.
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'receptacle'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install receptacle
+
+## Usage
+
+A repository mediates requests based on it's configuration to a strategy which
+then itself implements the necessary functions to access the data source.
+
+```
+                                                +--------------------+      +--------+
+                                                |                    |      |Database|
+                                                |  DatabaseStrategy  +------>        |
+                                                |                    |      |        |
++--------------------+     +--------------+     +----------^---------+      |        |
+|                    |     |              |                |                +--------+
+|   Business Logic   +----->  Repository  +----------------+
+|                    |     |              |
++--------------------+     +--------|-----+     +--------------------+
+                                    |           |                    |
+                                    |           |  InMemoryStrategy  |
+                            +-------|-----+     |                    |
+                            |Configuration|     +--------------------+
+                            +-------------+
+```
+
+Let's look at the pieces:
+
+1. the repository itself - which is a simple module including the
+   `Receptacle` mixin
+
+```ruby
+module Repository
+  module User
+    include Receptacle
+    
+    mediate :find
+  end
+end
+```
+
+2. at least one strategy class which are implemented as plain ruby classes
+
+```ruby
+module Strategy
+  class Database
+    def find(id:)
+      # get data from data source and return a business entity
+    end
+  end
+end
+```
+
+Optionally wrapper classes can be defined
+
+```ruby
+module Wrapper
+  class Validator
+    def before_find(id:)
+      raise ArgumentError if id.nil?
+      {id: id}
+    end
+  end
+  class ModelMapper
+    def after_find(return_value, **_kwargs)
+      Model::User.new(return_value)
+    end
+  end
+end
+```
+
+### Example
+
+Everything combined a simple example could look like the following:
+
+```ruby
+require "receptacle"
+
+module Repository
+  module User
+    include Receptacle
+    mediate :find
+
+    module Strategy
+      class DB
+        def find(id:)
+          # code to find from the database
+        end
+      end
+      class InMemory
+        def find(id:)
+          # code to find from InMemory store
+        end
+      end
+    end
+
+    module Wrapper
+      class Validator
+        def before_find(id:)
+          raise ArgumentError if id.nil?
+          {id: id}
+        end
+      end
+      class ModelMapper
+        def after_find(return_value, **_kwargs)
+          Model::User.new(return_value)
+        end
+      end
+    end
+  end
+end
+```
+
+For better separation to other repositories the fact that the repository itself
+is a module can be used to nest both strategies and wrapper underneath.
+
+Somewhere in your application config you now need to setup the strategy and the
+wrappers for this repository like this:
+
+```ruby
+Repository::User.strategy Repository::User::Strategy::DB
+Repository::User.wrappers [Repository::User::Wrapper::Validator,
+                           Repository::User::Wrapper::ModelMapper])
+```
+
+With this setup to use the repository method is as simple and straight forward
+as calling `Repository::User.find(id: 123)`
 
 ## Repository Pattern
+
+What is the matter with this repository pattern and why should I care using it?
 
 ### Motivation
 
@@ -15,7 +159,7 @@ database. This has several disadvantages such as
 - no separation between business logic and access to the data source
 - harder to add or change global policies like caching
 - caused by missing isolation it's harder to test the business logic independent
-from the data source
+  from the data source
 
 ### Solution
 
@@ -37,27 +181,7 @@ Due to the ability to switch strategies a repository can also help to keep the
 application architecture flexible as a change in strategy has no impact on the
 business logic above.
 
-### Flow
-
-The repository mediates requests based on it's configuration to a strategy which
-then itself implements the necessary functions to access the data source.
-
-```
-                                                +--------------------+      +--------+
-                                                |                    |      |Database|
-                                                |  DatabaseStrategy  +------>        |
-                                                |                    |      |        |
-+--------------------+     +--------------+     +----------^---------+      |        |
-|                    |     |              |                |                +--------+
-|   Business Logic   +----->  Repository  +----------------+
-|                    |     |              |
-+--------------------+     +--------|-----+     +--------------------+
-                                    |           |                    |
-                                    |           |  InMemoryStrategy  |
-                            +-------|-----+     |                    |
-                            |Configuration|     +--------------------+
-                            +-------------+
-```
+## Details
 
 ### Strategy
 
@@ -136,136 +260,18 @@ If multiple wrapper classes are defined the before wrapper actions are executed
 in the order the wrapper classes are defined while the after actions are applied
 in reverse order.
 
-
-## main goals of this implementation
+## Goals of this implementation
 
 - small core codebase
-- minimal processing overhead (method dispatching should be as fast as possible)
+- minimal processing overhead - fast method dispatching
+- flexible - all kind of methods should possible to be mediated
+- basic but powerful callbacks/hooks/observer possibilities
 
-## Installation
+### ToDo
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'receptacle'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install receptacle
-
-## Usage
-
-As described above the Flow consists of at least two pieces:
-
-1. the repository itself - which can simple be a module
-
-```ruby
-module Repository
-  module User
-    include Receptacle::Base
-    
-    mediate :find
-  end
-end
-```
-
-2. at least one strategy class
-
-```ruby
-module Strategy
-  class Database
-    def find(id:)
-      # get data from data source and return a business entity
-    end
-  end
-end
-```
-
-Optionally wrapper classes can be defined
-
-```ruby
-module Wrapper
-  class Validator
-    def before_find(id:)
-      raise ArgumentError if id.nil?
-      {id: id}
-    end
-  end
-  class ModelMapper
-    def after_find(return_value, **_kwargs)
-      Model::User.new(return_value)
-    end
-  end
-end
-```
-
-### Example
-
-Everything combined a simple example could look like the following:
-
-```ruby
-require "receptacle"
-
-module Repository
-  module User
-    include Receptacle
-    mediate :find
-
-    module Strategy
-      class DB
-        def find(id:)
-          # code to find from the database
-        end
-      end
-      class InMemory
-        def find(id:)
-          # code to find from InMemory store
-        end
-      end
-    end
-
-    module Wrapper
-      class Validator
-        def before_find(id:)
-          raise ArgumentError if id.nil?
-          {id: id}
-        end
-      end
-      class ModelMapper
-        def after_find(return_value, **_kwargs)
-          Model::User.new(return_value)
-        end
-      end
-    end
-  end
-end
-```
-
-For better separation the fact that the repository itself is a module is used to
-nest both strategies and wrapper underneath.
-
-Somewhere in your application config you now need to setup the strategy and the
-wrappers for this repository like this:
-
-```ruby
-Repository::User.strategy Repository::User::Strategy::DB
-Repository::User.wrappers [Repository::User::Wrapper::Validator,
-                           Repository::User::Wrapper::ModelMapper])
-```
-
-With this setup to use the repository method is as simple and straight forward
-as calling `Repository::User.find(id: 123)`
-
-## ToDo
-
-- add support classes for testing
-  - easy strategy switching
-  - in memory strategy base class
+- [ ] add test helper
+  - [ ] easy strategy switching
+  - [ ] in memory strategy base class
 
 ## Development
 
