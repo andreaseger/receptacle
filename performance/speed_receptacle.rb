@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'receptacle'
 module Speed
-  include Receptacle::Base
+  include Receptacle
   mediate :a
   mediate :b
   mediate :c

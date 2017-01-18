@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 require 'test_helper'
+require 'count_down_latch'
 require 'fixture'
 
 class ReceptacleTest < Minitest::Test
-  parallelize_me!
   def callstack
-    Fixtures::CallStack.instance.stack
+    Thread.current[:receptacle_test_callstack]
   end
 
   def receptacle
@@ -13,7 +13,7 @@ class ReceptacleTest < Minitest::Test
   end
 
   def clear_callstack
-    Fixtures::CallStack.instance.stack = []
+    Thread.current[:receptacle_test_callstack] = []
   end
 
   def setup
@@ -25,7 +25,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_provide_dsl
     mod = Module.new
-    mod.include(Receptacle::Base)
+    mod.include(Receptacle)
     assert mod.respond_to?(:strategy)
     assert mod.respond_to?(:mediate)
     assert mod.respond_to?(:wrappers)
@@ -33,7 +33,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_define_methods_via_mediate
     mod = Module.new
-    mod.include(Receptacle::Base)
+    mod.include(Receptacle)
     refute mod.respond_to?(:some_method)
     mod.mediate(:some_method)
     assert mod.respond_to?(:some_method)
@@ -41,7 +41,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_define_methods_via_delegate_to_strategy
     mod = Module.new
-    mod.include(Receptacle::Base)
+    mod.include(Receptacle)
     refute mod.respond_to?(:some_method)
     mod.delegate_to_strategy(:some_method)
     assert mod.respond_to?(:some_method)
@@ -49,7 +49,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_reserved_method_names
     mod = Module.new
-    mod.include(Receptacle::Base)
+    mod.include(Receptacle)
 
     # error for reserved method names
     %i(wrappers strategy mediate delegate_to_strategy).each do |method_name|
@@ -242,21 +242,6 @@ class ReceptacleTest < Minitest::Test
     ], callstack
   end
 
-  def test_shared_wrapper_instance_between_before_after
-    receptacle.strategy Fixtures::Strategy::One
-    mock = Minitest::Mock.new
-    # for method_cache stuff
-    mock.expect(:method_defined?, true, [:before_a])
-    mock.expect(:method_defined?, true, [:after_a])
-    mock.expect(:hash, 1)
-    mock.expect(:hash, 1)
-    # actual expectation
-    mock.expect(:new, Fixtures::Wrapper::BeforeAfterA.new)
-    receptacle.wrappers mock
-    receptacle.a(22)
-    mock.verify
-  end
-
   def test_sharing_state_between_before_after_inside_wrapper
     receptacle.strategy Fixtures::Strategy::One
     receptacle.wrappers Fixtures::Wrapper::BeforeAfterWithStateC
@@ -269,5 +254,31 @@ class ReceptacleTest < Minitest::Test
     ], callstack
 
     assert_equal 'NEW_STATE_WAT9', receptacle.c(string: 'new_state')
+  end
+
+  def test_thread_safety_for_mediated_method_calls
+    # This config is global for the whole application
+    receptacle.strategy Fixtures::Strategy::One
+    receptacle.wrappers Fixtures::Wrapper::BeforeAfterWithStateC
+
+    latch = CountDownLatch.new(1)
+
+    t1 = Thread.new do
+      latch.wait
+      assert_equal 'T1_WAT2', receptacle.c(string: 't1')
+    end
+    t2 = Thread.new do
+      latch.wait
+      assert_equal 'T2_WAT2', receptacle.c(string: 't2')
+    end
+    t3 = Thread.new do
+      latch.wait
+      assert_equal 'T3_WAT2', receptacle.c(string: 't3')
+    end
+
+    latch.count_down
+    t1.join
+    t2.join
+    t3.join
   end
 end

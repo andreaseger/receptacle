@@ -35,7 +35,7 @@ require "receptacle"
 
 module Repository
   module User
-    include Receptacle::Base
+    include Receptacle
     mediate :find
     module Strategy
       class DB
