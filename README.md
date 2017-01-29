@@ -181,6 +181,35 @@ Due to the ability to switch strategies a repository can also help to keep the
 application architecture flexible as a change in strategy has no impact on the
 business logic above.
 
+
+## How does it compare to other repository pattern implementations
+
+Compared to other gem implementing the repository pattern this gem makes no
+assumptions regarding the interface of your repository or what kind of data
+source is used.
+Some alternative have some interesting features nevertheless:
+
+- [Hanami::Repository](https://github.com/hanami/model#repositories) is for one
+  closely tied to the the Hanami entities and does not separate the repository
+  interface from the implementing strategies. For straight forward mapping of
+  entity to data source this might be enough though. Another caveat is that it
+  currently only supports SQL data sources.
+- [ROM::Repository](http://rom-rb.org/learn/repositories/) similarly is tied to
+  other facilities of ROM like the ROM containers. It also appears to take a
+  similar approach as Hanami to custom queries which should not leak to the
+  outside application. The addition of `ROM::Changeset` brings an interesting
+  addition to the mix which might make it an interesting alternative if using
+  `ROM` fits into the applications structure.
+  
+This gem on the other hand makes absolutely no assumptions about your data
+source or general structure of your code. It can be simply plugged in between
+your business logic and data source to abstract the two. The data source can
+essentially be anything. A SQL database, a no-SQL database, a JSON API or even a
+gem. Placing a gem behind a repository can be useful if you're not yet sure this
+is the correct or best possible gem,
+the [faraday](https://github.com/lostisland/faraday) gem is essentially doing
+this by giving all the different http libraries a common interface).
+
 ## Details
 
 ### Strategy
