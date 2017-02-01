@@ -51,7 +51,7 @@ Let's look at the pieces:
 ```ruby
 module Repository
   module User
-    include Receptacle
+    include Receptacle::Repo
     
     mediate :find
   end
@@ -97,7 +97,7 @@ require "receptacle"
 
 module Repository
   module User
-    include Receptacle
+    include Receptacle::Repo
     mediate :find
 
     module Strategy
@@ -181,35 +181,6 @@ Due to the ability to switch strategies a repository can also help to keep the
 application architecture flexible as a change in strategy has no impact on the
 business logic above.
 
-
-## How does it compare to other repository pattern implementations
-
-Compared to other gem implementing the repository pattern this gem makes no
-assumptions regarding the interface of your repository or what kind of data
-source is used.
-Some alternative have some interesting features nevertheless:
-
-- [Hanami::Repository](https://github.com/hanami/model#repositories) is for one
-  closely tied to the the Hanami entities and does not separate the repository
-  interface from the implementing strategies. For straight forward mapping of
-  entity to data source this might be enough though. Another caveat is that it
-  currently only supports SQL data sources.
-- [ROM::Repository](http://rom-rb.org/learn/repositories/) similarly is tied to
-  other facilities of ROM like the ROM containers. It also appears to take a
-  similar approach as Hanami to custom queries which should not leak to the
-  outside application. The addition of `ROM::Changeset` brings an interesting
-  addition to the mix which might make it an interesting alternative if using
-  `ROM` fits into the applications structure.
-  
-This gem on the other hand makes absolutely no assumptions about your data
-source or general structure of your code. It can be simply plugged in between
-your business logic and data source to abstract the two. The data source can
-essentially be anything. A SQL database, a no-SQL database, a JSON API or even a
-gem. Placing a gem behind a repository can be useful if you're not yet sure this
-is the correct or best possible gem,
-the [faraday](https://github.com/lostisland/faraday) gem is essentially doing
-this by giving all the different http libraries a common interface).
-
 ## Details
 
 ### Strategy
@@ -289,18 +260,62 @@ If multiple wrapper classes are defined the before wrapper actions are executed
 in the order the wrapper classes are defined while the after actions are applied
 in reverse order.
 
+### Memory Strategy
+
+Although currently not part of the gem a simple memory strategy can be
+implemented in this way:
+
+```ruby
+class MemoryStore
+  class << self; attr_accessor :store end
+  
+  def clear
+    self.class.store = []
+  end
+  
+  private def store
+    self.class.store || clear
+  end
+end
+```
+
+## How does it compare to other repository pattern implementations
+
+Compared to other gem implementing the repository pattern this gem makes no
+assumptions regarding the interface of your repository or what kind of data
+source is used.
+Some alternative have some interesting features nevertheless:
+
+- [Hanami::Repository](https://github.com/hanami/model#repositories) is for one
+  closely tied to the the Hanami entities and does not separate the repository
+  interface from the implementing strategies. For straight forward mapping of
+  entity to data source this might be enough though. Another caveat is that it
+  currently only supports SQL data sources.
+- [ROM::Repository](http://rom-rb.org/learn/repositories/) similarly is tied to
+  other facilities of ROM like the ROM containers. It also appears to take a
+  similar approach as Hanami to custom queries which should not leak to the
+  outside application. There is predefined interface for manipulating resources
+  through. The addition of `ROM::Changeset` brings an interesting addition to
+  the mix which might make it an interesting alternative if using `ROM` fits
+  into the applications structure.
+  
+This gem on the other hand makes absolutely no assumptions about your data
+source or general structure of your code. It can be simply plugged in between
+your business logic and data source to abstract the two. Of cause like the other
+repository pattern implementations strategy details should be hidden from the
+interface. The data source can essentially be anything. A SQL database, a no-SQL
+database, a JSON API or even a gem. Placing a gem behind a repository can be
+useful if you're not yet sure this is the correct or best possible gem,
+the [faraday](https://github.com/lostisland/faraday) gem is essentially doing
+this by giving all the different http libraries a common interface).
+
+
 ## Goals of this implementation
 
 - small core codebase
 - minimal processing overhead - fast method dispatching
 - flexible - all kind of methods should possible to be mediated
 - basic but powerful callbacks/hooks/observer possibilities
-
-### ToDo
-
-- [ ] add test helper
-  - [ ] easy strategy switching
-  - [ ] in memory strategy base class
 
 ## Development
 
@@ -321,8 +336,15 @@ https://github.com/andreaseger/receptacle. This project is intended to be a safe
 welcoming space for collaboration, and contributors are expected to adhere to
 the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
+## Attribution
+
+[Runtastic][runtastic] is using the repository pattern extensively in its
+backend services and inspired the creation of this library. Nevertheless no code
+developed at [Runtastic][runtastic] was used in this library.
+
 ## License
 
 The gem is available as open source under the terms of
 the [MIT License](http://opensource.org/licenses/MIT).
 
+[runtastic]: https://github.com/runtastic
