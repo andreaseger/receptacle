@@ -1,8 +1,9 @@
 language: ruby
+cache: bundler
 rvm:
-  - 2.2
-  - 2.4
-  - jruby-9.1.5.0
+  - 2.3.3
+  - 2.4.0
+  - jruby-9.1.7.0
 jdk:
   - oraclejdk8
   # - openjdk7
@@ -11,15 +12,12 @@ env:
   - "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
 matrix:
   exclude:
-    - rvm: 2.2
+    - rvm: 2.3.3
       jdk: oraclejdk8
-      env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
-    - rvm: 2.4
+      env: "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
+    - rvm: 2.4.0
       jdk: oraclejdk8
-      env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
-    # - rvm: 2.2
-    #   jdk: openjdk7
-    #   env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
-    # - rvm: 2.4
-    #   jdk: openjdk7
-    #   env: "JRUBY_OPTS='--server -Xcompile.invokedynamic=true'"
+      env: "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
+before_install:
+  - gem update --system
+  - gem install bundler -v 1.14.3
