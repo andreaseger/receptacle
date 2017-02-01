@@ -1,5 +1,10 @@
 # Receptacle
 
+
+[![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
+[![Build Status](https://travis-ci.org/andreaseger/receptacle.svg?branch=master)](https://travis-ci.org/andreaseger/receptacle)
+[![codecov](https://codecov.io/gh/andreaseger/receptacle/branch/master/graph/badge.svg)](https://codecov.io/gh/andreaseger/receptacle)
+
 ## About
 
 Provides easy and fast means to use the repository pattern to create separation
