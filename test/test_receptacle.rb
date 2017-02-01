@@ -25,7 +25,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_provide_dsl
     mod = Module.new
-    mod.include(Receptacle)
+    mod.include(Receptacle::Repo)
     assert mod.respond_to?(:strategy)
     assert mod.respond_to?(:mediate)
     assert mod.respond_to?(:wrappers)
@@ -33,7 +33,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_define_methods_via_mediate
     mod = Module.new
-    mod.include(Receptacle)
+    mod.include(Receptacle::Repo)
     refute mod.respond_to?(:some_method)
     mod.mediate(:some_method)
     assert mod.respond_to?(:some_method)
@@ -41,7 +41,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_define_methods_via_delegate_to_strategy
     mod = Module.new
-    mod.include(Receptacle)
+    mod.include(Receptacle::Repo)
     refute mod.respond_to?(:some_method)
     mod.delegate_to_strategy(:some_method)
     assert mod.respond_to?(:some_method)
@@ -49,7 +49,7 @@ class ReceptacleTest < Minitest::Test
 
   def test_reserved_method_names
     mod = Module.new
-    mod.include(Receptacle)
+    mod.include(Receptacle::Repo)
 
     # error for reserved method names
     %i(wrappers strategy mediate delegate_to_strategy).each do |method_name|

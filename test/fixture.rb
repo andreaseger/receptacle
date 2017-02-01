@@ -6,7 +6,7 @@ module Fixtures
     Thread.current[:receptacle_test_callstack] ||= []
   end
   module Test
-    include Receptacle
+    include Receptacle::Repo
     mediate :a
     mediate :b
     mediate :c

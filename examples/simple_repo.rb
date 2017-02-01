@@ -13,7 +13,7 @@ User = Struct.new(:id, :name)
 # define our Repository
 module Repository
   module User
-    include Receptacle::Base
+    include Receptacle::Repo
     mediate :find
     mediate :create
   end
