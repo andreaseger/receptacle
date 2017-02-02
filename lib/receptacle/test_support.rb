@@ -43,5 +43,13 @@ module Receptacle
       yield
       repo.strategy original_strategy
     end
+
+    # rspec mocks/stubs don't like the lazy defined delegate methods use this to
+    # make sure the methods are already defined
+    def ensure_method_delegators(repo)
+      Receptacle::Registration.repositories[repo].methods.each do |method_name|
+        repo.__build_method(method_name)
+      end
+    end
   end
 end
