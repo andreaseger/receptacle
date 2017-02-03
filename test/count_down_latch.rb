@@ -11,14 +11,14 @@ class CountDownLatch
 
   def count_down
     @lock.synchronize do
-      @count -= 1 if @count.positive?
+      @count -= 1 if @count > 0
       @condition.broadcast if @count.zero?
     end
   end
 
   def wait
     @lock.synchronize do
-      @condition.wait(@lock) while @count.positive?
+      @condition.wait(@lock) while @count > 0
     end
   end
 end

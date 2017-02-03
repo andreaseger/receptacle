@@ -3,7 +3,7 @@
 # run with --profile.api in JRUBY_OPTS
 require 'bundler/inline'
 require 'jruby/profiler'
-PROFILE_NAME = 'receptacle'
+PROFILE_NAME = 'receptacle'.freeze
 
 gemfile false do
   source 'https://rubygems.org'

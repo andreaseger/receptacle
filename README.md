@@ -2,6 +2,7 @@
 
 
 [![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
+[![Gem Downloads](https://img.shields.io/gem/dt/receptacle.svg)](https://rubygems.org/gems/receptacle)
 [![Build Status](https://travis-ci.org/andreaseger/receptacle.svg?branch=master)](https://travis-ci.org/andreaseger/receptacle)
 [![codecov](https://codecov.io/gh/andreaseger/receptacle/branch/master/graph/badge.svg)](https://codecov.io/gh/andreaseger/receptacle)
 

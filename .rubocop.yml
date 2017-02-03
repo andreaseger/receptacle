@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.2
 
 Metrics/LineLength:
   Max: 99
@@ -21,7 +21,6 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Exclude:
     - test/*
-
 
 Style/Documentation:
   Enabled: false
