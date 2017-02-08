@@ -1,6 +1,5 @@
 # Receptacle
 
-
 [![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
 [![Gem Downloads](https://img.shields.io/gem/dt/receptacle.svg)](https://rubygems.org/gems/receptacle)
 [![Build Status](https://travis-ci.org/andreaseger/receptacle.svg?branch=master)](https://travis-ci.org/andreaseger/receptacle)
@@ -273,14 +272,21 @@ implemented in this way:
 
 ```ruby
 class MemoryStore
-  class << self; attr_accessor :store end
+  class << self
+    def store
+      @store || clear
+    end
+    def clear
+      @store = {}
+    end
+  end
   
   def clear
-    self.class.store = []
+    self.class.clear
   end
   
   private def store
-    self.class.store || clear
+    self.class.store
   end
 end
 ```
@@ -315,6 +321,14 @@ useful if you're not yet sure this is the correct or best possible gem,
 the [faraday](https://github.com/lostisland/faraday) gem is essentially doing
 this by giving all the different http libraries a common interface).
 
+## Testing
+
+A module called `TestSupport` can be found
+[here](https://github.com/andreaseger/receptacle/blob/master/lib/receptacle/test_support.rb).
+Right now it provides 2 helper methods `with_strategy` to easily toggle
+temporarily to another strategy and `ensure_method_delegators` to solve issues
+caused by Rspec when attempting to stub a repository method. Both methods and
+how to use them is described in more detail in the inline documentation. 
 
 ## Goals of this implementation
 

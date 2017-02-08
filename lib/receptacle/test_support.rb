@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 module Receptacle
   module TestSupport
+    # with_strategy
+    #
     # provides helpful method to toggle strategies during testing
     #
     # can be used in rspec like this
@@ -45,8 +47,16 @@ module Receptacle
       repo.strategy original_strategy
     end
 
-    # rspec mocks/stubs don't like the lazy defined delegate methods
-    # use this in a before_hook to make sure the methods are already defined
+    # ensure_method_delegators
+    #
+    # When using something like `allow(SomeRepo).to receive(:find)` (where find
+    # is a mediated method) before the method was called the first time Rspec
+    # would stub the method with the wrong arity of 0 when also using jruby.
+    # This seems to be caused by the lazily defined methods. Simply calling the
+    # following method in a before hook when method stubbing is need solves this
+    # issue. As it's a problem which only affects mocking libraries it's
+    # currently not planned to change this behavior.
+    #
     def ensure_method_delegators(repo)
       Receptacle::Registration.repositories[repo].methods.each do |method_name|
         repo.__build_method(method_name)
