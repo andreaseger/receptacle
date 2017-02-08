@@ -1,6 +1,7 @@
 language: ruby
 cache: bundler
 rvm:
+  - 2.1.10
   - 2.2.6
   - 2.3.3
   - 2.4.0
@@ -12,6 +13,9 @@ env:
   - "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
 matrix:
   exclude:
+    - rvm: 2.1.10
+      jdk: oraclejdk8
+      env: "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
     - rvm: 2.2.6
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true'"
