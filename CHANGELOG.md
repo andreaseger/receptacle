@@ -4,6 +4,12 @@ Changelog
 master
 ---
 
+0.2.0
+---
+
+- update documentation
+- enable ruby 2.1+
+
 0.1.1
 ---
 
