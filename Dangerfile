@@ -9,7 +9,7 @@ if has_app_changes && !has_test_changes && !is_version_bump
   warn("Tests were not updated. That's OK if you're refactoring existing code.", sticky: false)
 end
 
-changelog.check
+changelog.have_you_updated_changelog?
 
 # Make it more obvious that a PR is a work in progress and shouldn't be merged yet
 warn("PR is classed as Work in Progress") if github.pr_title.include? "WIP"
