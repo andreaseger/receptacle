@@ -17,7 +17,7 @@ warn("PR is classed as Work in Progress") if github.pr_title.include? "WIP"
 # Warn when there is a big PR
 warn("Big PR") if git.lines_of_code > 500
 
-commit_lint.check warn: :all
+commit_lint.check warn: :all, disable: [:subject_cap]
 
 # Coverage
 simplecov.report('coverage/coverage.json')
