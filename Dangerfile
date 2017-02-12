@@ -26,4 +26,4 @@ commit_lint.check warn: :all, disable: [:subject_cap]
 simplecov.report('coverage/coverage.json')
 
 # rubocop
-rubocop.lint
+rubocop.lint "*"
