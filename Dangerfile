@@ -3,13 +3,16 @@
 # --------------------------------------------------------------------------------------------------------------------
 has_app_changes = !git.modified_files.grep(/lib/).empty?
 has_test_changes = !git.modified_files.grep(/test/).empty?
-is_version_bump = git.modified_files.sort == ["CHANGELOG.md", "lib/danger/version.rb"].sort
+is_version_bump = git.modified_files.sort == ["CHANGELOG.md", "lib/receptacle/version.rb"].sort
 
 if has_app_changes && !has_test_changes && !is_version_bump
   warn("Tests were not updated. That's OK if you're refactoring existing code.", sticky: false)
 end
 
-changelog.have_you_updated_changelog?
+if !git.modified_files.include?("CHANGELOG.md") && has_app_changes
+  fail("Please include a CHANGELOG entry. \nYou can find it at [CHANGELOG.md](https://github.com/andreaseger/receptacle/blob/master/CHANGELOG.md).")
+  message "Note, we hard-wrap at 80 chars and use 2 spaces after the last line."
+end
 
 # Make it more obvious that a PR is a work in progress and shouldn't be merged yet
 warn("PR is classed as Work in Progress") if github.pr_title.include? "WIP"
