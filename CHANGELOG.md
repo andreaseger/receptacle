@@ -4,6 +4,9 @@ Changelog
 master
 ---
 
+0.3.0
+---
+
 * add danger
 * also support higher arity methods (== method with more than one argument)
 
