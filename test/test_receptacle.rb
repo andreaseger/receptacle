@@ -158,6 +158,23 @@ class ReceptacleTest < Minitest::Test
     ], callstack
   end
 
+  def test_argument_passing_multiple_arguments
+    receptacle.strategy Fixtures::Strategy::One
+    assert_equal 46, receptacle.e(1, 45)
+    assert_equal [
+      [Fixtures::Strategy::One, :e, [1, 45]]
+    ], callstack
+    clear_callstack
+
+    receptacle.wrappers [Fixtures::Wrapper::BeforeAll, Fixtures::Wrapper::AfterAll]
+    assert_equal 348, receptacle.e(5, 33)
+    assert_equal [
+      [Fixtures::Wrapper::BeforeAll, :before_e, [5, 33]],
+      [Fixtures::Strategy::One, :e, [10, 38]],
+      [Fixtures::Wrapper::AfterAll, :after_e, [10, 38], 48]
+    ], callstack
+  end
+
   def test_after_wrapper
     receptacle.strategy Fixtures::Strategy::Two
     receptacle.wrappers [Fixtures::Wrapper::AfterAll]

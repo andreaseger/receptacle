@@ -11,6 +11,7 @@ module Fixtures
     mediate :b
     mediate :c
     mediate :d
+    mediate :e
   end
 
   module Strategy
@@ -33,6 +34,11 @@ module Fixtures
       def d(context:)
         Fixtures.callstack.push([self.class, __method__, context])
         yield(context)
+      end
+
+      def e(first, second)
+        Fixtures.callstack.push([self.class, __method__, [first, second]])
+        first + second
       end
     end
     class Two < One
@@ -133,6 +139,11 @@ module Fixtures
         Fixtures.callstack.push([self.class, __method__, context])
         { context: context + '_bar' }
       end
+
+      def before_e(first, second)
+        Fixtures.callstack.push([self.class, __method__, [first, second]])
+        [first + 5, second + 5]
+      end
     end
 
     class AfterAll
@@ -158,6 +169,11 @@ module Fixtures
       def after_d(return_value, context:)
         Fixtures.callstack.push([self.class, __method__, context, return_value])
         return_value + '_foobar'
+      end
+
+      def after_e(return_value, first, second)
+        Fixtures.callstack.push([self.class, __method__, [first, second], return_value])
+        return_value + 300
       end
     end
   end

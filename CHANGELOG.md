@@ -5,6 +5,7 @@ master
 ---
 
 * add danger
+* also support higher arity methods (== method with more than one argument)
 
 0.2.0
 ---

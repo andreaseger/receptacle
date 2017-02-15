@@ -13,6 +13,8 @@ module Receptacle
     attr_reader :before_method_name
     # @return [Symbol] name of the after action method
     attr_reader :after_method_name
+    # @return [Integer] arity of strategy method according to https://ruby-doc.org/core-2.3.3/Method.html#method-i-arity
+    attr_reader :arity
 
     def initialize(method_name:, strategy:, before_wrappers:, after_wrappers:)
       @strategy = strategy
@@ -24,6 +26,7 @@ module Receptacle
       @wrappers = before_wrappers | after_wrappers
       @skip_before_wrappers = before_wrappers.empty?
       @skip_after_wrappers = after_wrappers.empty?
+      @arity = strategy.new.method(method_name).arity
     end
 
     # @return [Boolean] true if no before wrappers need to be applied for this method
