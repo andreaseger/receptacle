@@ -1,19 +1,9 @@
 # frozen_string_literal: true
 unless RUBY_PLATFORM == 'java'
   require 'simplecov'
-  require 'simplecov-json'
   if ENV['TRAVIS']
     require 'codecov'
-    SimpleCov.formatters = [
-      SimpleCov::Formatter::Codecov,
-      SimpleCov::Formatter::JSONFormatter
-    ]
-  else
-    SimpleCov.formatters = [
-      SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::JSONFormatter
-    ]
-
+    SimpleCov.formatter SimpleCov::Formatter::Codecov
   end
   SimpleCov.start do
     add_filter '/test/'
