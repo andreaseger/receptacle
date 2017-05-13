@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Receptacle
   # Cache describing which strategy and wrappers need to be applied for this method
   # @api private

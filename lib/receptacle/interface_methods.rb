@@ -1,10 +1,11 @@
 # frozen_string_literal: true
+
 require 'receptacle/registration'
 require 'receptacle/errors'
 
 module Receptacle
   module InterfaceMethods
-    RESERVED_METHOD_NAMES = Set.new(%i(wrappers mediate strategy delegate_to_strategy))
+    RESERVED_METHOD_NAMES = Set.new(%i[wrappers mediate strategy delegate_to_strategy])
     private_constant :RESERVED_METHOD_NAMES
 
     # registers a method_name for the to be mediated or forwarded to the configured strategy

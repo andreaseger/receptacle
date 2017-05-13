@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Receptacle
   module TestSupport
     # with_strategy

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'test_helper'
 require 'count_down_latch'
 require 'fixture'
@@ -52,7 +53,7 @@ class ReceptacleTest < Minitest::Test
     mod.include(Receptacle::Repo)
 
     # error for reserved method names
-    %i(wrappers strategy mediate delegate_to_strategy).each do |method_name|
+    %i[wrappers strategy mediate delegate_to_strategy].each do |method_name|
       assert_raises(Receptacle::Errors::ReservedMethodName) { mod.mediate(method_name) }
     end
   end

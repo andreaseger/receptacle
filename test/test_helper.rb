@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 unless RUBY_PLATFORM == 'java'
   require 'simplecov'
   if ENV['TRAVIS']

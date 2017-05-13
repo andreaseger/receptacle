@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'receptacle/method_cache'
 require 'receptacle/registration'
 require 'receptacle/errors'

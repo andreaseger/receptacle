@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 # run with --profile.api in JRUBY_OPTS
 require 'bundler/inline'
 require 'jruby/profiler'
