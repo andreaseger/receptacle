@@ -1,10 +1,10 @@
 language: ruby
 cache: bundler
 rvm:
-  - ruby-2.1
-  - ruby-2.2
-  - ruby-2.3
-  - ruby-2.4
+  - 2.1
+  - 2.2
+  - 2.3.4
+  - 2.4.1
   - jruby-9.1.8.0
 jdk:
   - oraclejdk8
@@ -13,19 +13,19 @@ env:
   - "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
 matrix:
   exclude:
-    - rvm: ruby-2.1
+    - rvm: 2.1
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
-    - rvm: ruby-2.2
+    - rvm: 2.2
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
-    - rvm: ruby-2.3
+    - rvm: 2.3.4
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
-    - rvm: ruby-2.4
+    - rvm: 2.4.1
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
-  allow_failures:
+  allow_failure s:
     - rvm: jruby-9.1.8.0
       jdk: oraclejdk8
       env: "JRUBY_OPTS='-Xcompile.invokedynamic=true --debug'"
