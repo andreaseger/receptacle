@@ -1,14 +1,32 @@
 #!/usr/bin/env ruby
-# frozen_string_literal: true
-require 'bundler/inline'
 
+require 'bundler/inline'
 gemfile true do
   source 'https://rubygems.org'
-  gem 'receptacle', '../'
+  gem 'receptacle', '~>0.3'
   gem 'mongo'
 end
+require 'irb'
 
+# a simple struct to act as business entity
 User = Struct.new(:id, :name)
+
+# we have a global mongo connection which can be easily reused
+module Connection
+  class Mongo
+    include Singleton
+
+    def initialize
+      ::Mongo::Logger.logger.level = Logger::INFO
+      @client = ::Mongo::Client.new(['127.0.0.1:27017'], database: 'receptacle')
+      client[:users].delete_many # empty collection
+    end
+    attr_reader :client
+    def self.client
+      instance.client
+    end
+  end
+end
 
 # define our Repository
 module Repository
@@ -16,21 +34,7 @@ module Repository
     include Receptacle::Repo
     mediate :find
     mediate :create
-  end
-end
-
-# we should have a global mongo connection which can be easily reused
-module Connection
-  class Mongo
-    include Singleton
-
-    def initialize
-      @client = ::Mongo::Client.new
-    end
-    attr_reader :client
-    def self.client
-      instance.client
-    end
+    mediate :clear
   end
 end
 
@@ -40,14 +44,18 @@ module Repository
     module Strategy
       class Mongo
         def find(id:)
-          mongo_to_model(collection.find(_id: id))
+          mongo_to_model(collection.find(_id: id).first)
         rescue
           nil
         end
 
         def create(name:)
           ret = collection.insert_one(name: name)
-          find(id: ret['_id']) # TODO: check this
+          find(id: ret.inserted_id)
+        end
+
+        def clear
+          collection.delete_many
         end
 
         private
@@ -72,7 +80,11 @@ module Repository
 
         def create(name:)
           id = BSON::ObjectId.new
-          store[id] = User.new(id, name)
+          store[id] = ::User.new(id, name)
+        end
+
+        def clear
+          self.class.store = {}
         end
 
         private
@@ -89,15 +101,20 @@ end
 Repository::User.strategy Repository::User::Strategy::InMemory
 
 user = Repository::User.create(name: 'foo')
+print 'created user: '
 p user
+print 'find user by id: '
 p Repository::User.find(id: user.id)
 
 # switching to mongo and we see it's using a different store but keeps the same interface
 Repository::User.strategy Repository::User::Strategy::Mongo
 
+print 'search same user in other strategy: '
 p Repository::User.find(id: user.id)
 #-> nil
 
-user = Repository::User.create(name: 'foo')
+user = Repository::User.create(name: 'foo mongo')
+print 'create new user: '
 p user
+print 'find new user by id: '
 p Repository::User.find(id: user.id)

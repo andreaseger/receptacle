@@ -10,6 +10,8 @@
 Provides easy and fast means to use the repository pattern to create separation
 between your business logic and your data sources.
 
+Battle tested at [Runtastic](https://github.com/runtastic).
+
 ## Installation
 
 Add this line to your application's Gemfile:
