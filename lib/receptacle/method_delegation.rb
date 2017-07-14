@@ -38,14 +38,11 @@ module Receptacle
     # @return [MethodCache]
     def __build_method_call_cache(method_name)
       config = Registration.repositories[self]
-      before_method_name = :"before_#{method_name}"
-      after_method_name = :"after_#{method_name}"
 
       raise Errors::NotConfigured, repo: self if config.strategy.nil?
       MethodCache.new(
         strategy: config.strategy,
-        before_wrappers: config.wrappers.select { |w| w.method_defined?(before_method_name) },
-        after_wrappers: config.wrappers.select { |w| w.method_defined?(after_method_name) },
+        wrappers: config.wrappers,
         method_name: method_name
       )
     end

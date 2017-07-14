@@ -23,4 +23,4 @@ warn("Big PR") if git.lines_of_code > 500
 commit_lint.check warn: :all, disable: [:subject_cap]
 
 # rubocop
-rubocop.lint "*"
+rubocop.lint
