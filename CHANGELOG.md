@@ -4,6 +4,10 @@ Changelog
 master
 ---
 
+
+0.3.1
+---
+
 * fix after wrapper ordering bug [PR#6](https://github.com/andreaseger/receptacle/pull/6)
 
 0.3.0
