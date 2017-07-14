@@ -16,14 +16,14 @@ module Receptacle
     # @return [Integer] arity of strategy method according to https://ruby-doc.org/core-2.3.3/Method.html#method-i-arity
     attr_reader :arity
 
-    def initialize(method_name:, strategy:, before_wrappers:, after_wrappers:)
+    def initialize(method_name:, strategy:, wrappers:) # rubocop:disable Metrics/AbcSize
       @strategy = strategy
       @before_method_name = :"before_#{method_name}"
       @after_method_name = :"after_#{method_name}"
       @method_name = method_name.to_sym
-      before_wrappers ||= []
-      after_wrappers ||= []
-      @wrappers = before_wrappers | after_wrappers
+      before_wrappers = wrappers.select { |w| w.method_defined?(@before_method_name) }
+      after_wrappers = wrappers.select { |w| w.method_defined?(@after_method_name) }
+      @wrappers = wrappers & (before_wrappers | after_wrappers)
       @skip_before_wrappers = before_wrappers.empty?
       @skip_after_wrappers = after_wrappers.empty?
       @arity = strategy.new.method(method_name).arity
