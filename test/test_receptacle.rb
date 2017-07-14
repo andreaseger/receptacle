@@ -273,6 +273,19 @@ class ReceptacleTest < Minitest::Test
     assert_equal 'NEW_STATE_WAT9', receptacle.c(string: 'new_state')
   end
 
+  def test_after_wrapper_order
+    receptacle.strategy Fixtures::Strategy::One
+    receptacle.wrappers [Fixtures::Wrapper::AfterAll, Fixtures::Wrapper::BeforeAfterA]
+
+    assert_equal 187, receptacle.a(77)
+    assert_equal [
+      [Fixtures::Wrapper::BeforeAfterA, :before_a, 77],
+      [Fixtures::Strategy::One, :a, 82],
+      [Fixtures::Wrapper::BeforeAfterA, :after_a, 82, 82],
+      [Fixtures::Wrapper::AfterAll, :after_a, 82, 87]
+    ], callstack
+  end
+
   def test_thread_safety_for_mediated_method_calls
     # This config is global for the whole application
     receptacle.strategy Fixtures::Strategy::One
