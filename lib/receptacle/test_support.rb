@@ -7,7 +7,7 @@ module Receptacle
     #
     # can be used in rspec like this
     #
-    #    require 'receptacle/test_support'y
+    #    require 'receptacle/test_support'
     #    RSpec.configure do |c|
     #      c.include Receptacle::TestSupport
     #    end
