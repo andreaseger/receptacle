@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'test_helper'
-require 'count_down_latch'
-require 'fixture'
+
+require "test_helper"
+require "count_down_latch"
+require "fixture"
 
 class ReceptacleTest < Minitest::Test
   def callstack
@@ -52,7 +53,7 @@ class ReceptacleTest < Minitest::Test
     mod.include(Receptacle::Repo)
 
     # error for reserved method names
-    %i(wrappers strategy mediate delegate_to_strategy).each do |method_name|
+    %i[wrappers strategy mediate delegate_to_strategy].each do |method_name|
       assert_raises(Receptacle::Errors::ReservedMethodName) { mod.mediate(method_name) }
     end
   end
@@ -128,33 +129,33 @@ class ReceptacleTest < Minitest::Test
 
   def test_argument_passing_kwargs
     receptacle.strategy Fixtures::Strategy::One
-    assert_equal 'ARGUMENT_PASSING', receptacle.c(string: 'argument_passing')
+    assert_equal "ARGUMENT_PASSING", receptacle.c(string: "argument_passing")
     assert_equal [
-      [Fixtures::Strategy::One, :c, 'argument_passing']
+      [Fixtures::Strategy::One, :c, "argument_passing"]
     ], callstack
     clear_callstack
 
     receptacle.wrappers [Fixtures::Wrapper::BeforeAandC]
-    assert_equal 'TEST_FOO', receptacle.c(string: 'test')
+    assert_equal "TEST_FOO", receptacle.c(string: "test")
     assert_equal [
-      [Fixtures::Wrapper::BeforeAandC, :before_c, 'test'],
-      [Fixtures::Strategy::One, :c, 'test_foo']
+      [Fixtures::Wrapper::BeforeAandC, :before_c, "test"],
+      [Fixtures::Strategy::One, :c, "test_foo"]
     ], callstack
   end
 
   def test_argument_passing_block
     receptacle.strategy Fixtures::Strategy::One
-    assert_equal 'test_in_block', receptacle.d(context: 'test') { |c| "#{c}_in_block" }
+    assert_equal "test_in_block", receptacle.d(context: "test") { |c| "#{c}_in_block" }
     assert_equal [
-      [Fixtures::Strategy::One, :d, 'test']
+      [Fixtures::Strategy::One, :d, "test"]
     ], callstack
     clear_callstack
 
     receptacle.wrappers [Fixtures::Wrapper::BeforeAll]
-    assert_equal 'test_bar_in_block', receptacle.d(context: 'test') { |c| "#{c}_in_block" }
+    assert_equal "test_bar_in_block", receptacle.d(context: "test") { |c| "#{c}_in_block" }
     assert_equal [
-      [Fixtures::Wrapper::BeforeAll, :before_d, 'test'],
-      [Fixtures::Strategy::One, :d, 'test_bar']
+      [Fixtures::Wrapper::BeforeAll, :before_d, "test"],
+      [Fixtures::Strategy::One, :d, "test_bar"]
     ], callstack
   end
 
@@ -192,17 +193,17 @@ class ReceptacleTest < Minitest::Test
     ], callstack
     clear_callstack
 
-    assert_equal 'WRAPPER_foobar', receptacle.c(string: 'wrapper')
+    assert_equal "WRAPPER_foobar", receptacle.c(string: "wrapper")
     assert_equal [
-      [Fixtures::Strategy::Two, :c, 'wrapper'],
-      [Fixtures::Wrapper::AfterAll, :after_c, 'wrapper', 'WRAPPER']
+      [Fixtures::Strategy::Two, :c, "wrapper"],
+      [Fixtures::Wrapper::AfterAll, :after_c, "wrapper", "WRAPPER"]
     ], callstack
     clear_callstack
 
-    assert_equal 'test_in_block_foobar', receptacle.d(context: 'test') { |c| "#{c}_in_block" }
+    assert_equal "test_in_block_foobar", receptacle.d(context: "test") { |c| "#{c}_in_block" }
     assert_equal [
-      [Fixtures::Strategy::Two, :d, 'test'],
-      [Fixtures::Wrapper::AfterAll, :after_d, 'test', 'test_in_block']
+      [Fixtures::Strategy::Two, :d, "test"],
+      [Fixtures::Wrapper::AfterAll, :after_d, "test", "test_in_block"]
     ], callstack
   end
 
@@ -241,21 +242,21 @@ class ReceptacleTest < Minitest::Test
   def test_call_order_after_setup_change
     receptacle.strategy Fixtures::Strategy::One
     receptacle.wrappers [Fixtures::Wrapper::BeforeAll, Fixtures::Wrapper::AfterAll]
-    assert_equal 'BLA_BAR_foobar', receptacle.c(string: 'bla')
+    assert_equal "BLA_BAR_foobar", receptacle.c(string: "bla")
     assert_equal [
-      [Fixtures::Wrapper::BeforeAll, :before_c, 'bla'],
-      [Fixtures::Strategy::One, :c, 'bla_bar'],
-      [Fixtures::Wrapper::AfterAll, :after_c, 'bla_bar', 'BLA_BAR']
+      [Fixtures::Wrapper::BeforeAll, :before_c, "bla"],
+      [Fixtures::Strategy::One, :c, "bla_bar"],
+      [Fixtures::Wrapper::AfterAll, :after_c, "bla_bar", "BLA_BAR"]
     ], callstack
     clear_callstack
 
     receptacle.strategy Fixtures::Strategy::Two
     receptacle.wrappers [Fixtures::Wrapper::BeforeAll, Fixtures::Wrapper::BeforeAandC]
-    assert_equal 'BLA_BAR_FOO', receptacle.c(string: 'bla')
+    assert_equal "BLA_BAR_FOO", receptacle.c(string: "bla")
     assert_equal [
-      [Fixtures::Wrapper::BeforeAll, :before_c, 'bla'],
-      [Fixtures::Wrapper::BeforeAandC, :before_c, 'bla_bar'],
-      [Fixtures::Strategy::Two, :c, 'bla_bar_foo']
+      [Fixtures::Wrapper::BeforeAll, :before_c, "bla"],
+      [Fixtures::Wrapper::BeforeAandC, :before_c, "bla_bar"],
+      [Fixtures::Strategy::Two, :c, "bla_bar_foo"]
     ], callstack
   end
 
@@ -263,14 +264,14 @@ class ReceptacleTest < Minitest::Test
     receptacle.strategy Fixtures::Strategy::One
     receptacle.wrappers Fixtures::Wrapper::BeforeAfterWithStateC
 
-    assert_equal 'WOHOO_WAT5', receptacle.c(string: 'wohoo')
+    assert_equal "WOHOO_WAT5", receptacle.c(string: "wohoo")
     assert_equal [
-      [Fixtures::Wrapper::BeforeAfterWithStateC, :before_c, 'wohoo'],
-      [Fixtures::Strategy::One, :c, 'wohoo_wat'],
-      [Fixtures::Wrapper::BeforeAfterWithStateC, :after_c, 'wohoo_wat', 'WOHOO_WAT']
+      [Fixtures::Wrapper::BeforeAfterWithStateC, :before_c, "wohoo"],
+      [Fixtures::Strategy::One, :c, "wohoo_wat"],
+      [Fixtures::Wrapper::BeforeAfterWithStateC, :after_c, "wohoo_wat", "WOHOO_WAT"]
     ], callstack
 
-    assert_equal 'NEW_STATE_WAT9', receptacle.c(string: 'new_state')
+    assert_equal "NEW_STATE_WAT9", receptacle.c(string: "new_state")
   end
 
   def test_after_wrapper_order
@@ -295,15 +296,15 @@ class ReceptacleTest < Minitest::Test
 
     t1 = Thread.new do
       latch.wait
-      assert_equal 'T1_WAT2', receptacle.c(string: 't1')
+      assert_equal "T1_WAT2", receptacle.c(string: "t1")
     end
     t2 = Thread.new do
       latch.wait
-      assert_equal 'T2_WAT2', receptacle.c(string: 't2')
+      assert_equal "T2_WAT2", receptacle.c(string: "t2")
     end
     t3 = Thread.new do
       latch.wait
-      assert_equal 'T3_WAT2', receptacle.c(string: 't3')
+      assert_equal "T3_WAT2", receptacle.c(string: "t3")
     end
 
     latch.count_down

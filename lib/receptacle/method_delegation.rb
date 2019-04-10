@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'receptacle/method_cache'
-require 'receptacle/registration'
-require 'receptacle/errors'
+
+require "receptacle/method_cache"
+require "receptacle/registration"
+require "receptacle/errors"
 
 module Receptacle
   # module which enables a repository to mediate methods dynamically to wrappers and strategy
@@ -39,10 +40,11 @@ module Receptacle
     def __build_method_call_cache(method_name)
       config = Registration.repositories[self]
 
-      raise Errors::NotConfigured, repo: self if config.strategy.nil?
+      raise Errors::NotConfigured.new(repo: self) if config.strategy.nil?
+
       MethodCache.new(
-        strategy: config.strategy,
-        wrappers: config.wrappers,
+        strategy:    config.strategy,
+        wrappers:    config.wrappers,
         method_name: method_name
       )
     end
@@ -93,6 +95,7 @@ module Receptacle
         end
       ret = high_arity ? yield(*args) : yield(args)
       return ret if method_cache.skip_after_wrappers?
+
       __run_after_wrappers(wrappers, method_cache.after_method_name, args, ret, high_arity)
     end
 
@@ -105,6 +108,7 @@ module Receptacle
     def __run_before_wrappers(wrappers, method_name, args, high_arity = false)
       wrappers.each do |wrapper|
         next unless wrapper.respond_to?(method_name)
+
         args = if high_arity
                  wrapper.public_send(method_name, *args)
                else
@@ -124,6 +128,7 @@ module Receptacle
     def __run_after_wrappers(wrappers, method_name, args, return_value, high_arity = false)
       wrappers.reverse_each do |wrapper|
         next unless wrapper.respond_to?(method_name)
+
         return_value = if high_arity
                          wrapper.public_send(method_name, return_value, *args)
                        else

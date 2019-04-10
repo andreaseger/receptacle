@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require 'bundler/inline'
+require "bundler/inline"
 gemfile true do
-  source 'https://rubygems.org'
-  gem 'receptacle', '~>0.3'
-  gem 'mongo'
+  source "https://rubygems.org"
+  gem "receptacle", "~>0.3"
+  gem "mongo"
 end
-require 'irb'
+require "irb"
 
 # a simple struct to act as business entity
 User = Struct.new(:id, :name)
@@ -18,7 +19,7 @@ module Connection
 
     def initialize
       ::Mongo::Logger.logger.level = Logger::INFO
-      @client = ::Mongo::Client.new(['127.0.0.1:27017'], database: 'receptacle')
+      @client = ::Mongo::Client.new(["127.0.0.1:27017"], database: "receptacle")
       client[:users].delete_many # empty collection
     end
     attr_reader :client
@@ -45,7 +46,7 @@ module Repository
       class Mongo
         def find(id:)
           mongo_to_model(collection.find(_id: id).first)
-        rescue
+        rescue StandardError
           nil
         end
 
@@ -61,7 +62,7 @@ module Repository
         private
 
         def mongo_to_model(doc)
-          ::User.new(doc['_id'], doc['name'])
+          ::User.new(doc["_id"], doc["name"])
         end
 
         def collection
@@ -100,21 +101,21 @@ end
 # configure the repository and use it
 Repository::User.strategy Repository::User::Strategy::InMemory
 
-user = Repository::User.create(name: 'foo')
-print 'created user: '
+user = Repository::User.create(name: "foo")
+print "created user: "
 p user
-print 'find user by id: '
+print "find user by id: "
 p Repository::User.find(id: user.id)
 
 # switching to mongo and we see it's using a different store but keeps the same interface
 Repository::User.strategy Repository::User::Strategy::Mongo
 
-print 'search same user in other strategy: '
+print "search same user in other strategy: "
 p Repository::User.find(id: user.id)
 #-> nil
 
-user = Repository::User.create(name: 'foo mongo')
-print 'create new user: '
+user = Repository::User.create(name: "foo mongo")
+print "create new user: "
 p user
-print 'find new user by id: '
+print "find new user by id: "
 p Repository::User.find(id: user.id)

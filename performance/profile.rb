@@ -1,15 +1,16 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 # run with --profile.api in JRUBY_OPTS
-require 'bundler/inline'
-require 'jruby/profiler'
-PROFILE_NAME = 'receptacle'.freeze
+require "bundler/inline"
+require "jruby/profiler"
+PROFILE_NAME = "receptacle"
 
 gemfile false do
-  source 'https://rubygems.org'
-  gem 'receptacle', path: './..'
+  source "https://rubygems.org"
+  gem "receptacle", path: "./.."
 end
-require_relative 'speed_receptacle'
+require_relative "speed_receptacle"
 
 Speed.strategy(Speed::Strategy::One)
 Speed.wrappers [Speed::Wrappers::W1,
@@ -32,8 +33,8 @@ profile_data = JRuby::Profiler.profile do
 end
 
 profile_printer = JRuby::Profiler::GraphProfilePrinter.new(profile_data)
-profile_printer.printProfile(File.open("#{PROFILE_NAME}.graph.profile", 'w+'))
+profile_printer.printProfile(File.open("#{PROFILE_NAME}.graph.profile", "w+"))
 profile_printer.printProfile(STDOUT)
 
 profile_printer = JRuby::Profiler::FlatProfilePrinter.new(profile_data)
-profile_printer.printProfile(File.open("#{PROFILE_NAME}.flat.profile", 'w+'))
+profile_printer.printProfile(File.open("#{PROFILE_NAME}.flat.profile", "w+"))

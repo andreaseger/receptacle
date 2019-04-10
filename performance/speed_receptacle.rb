@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'receptacle'
+
+require "receptacle"
 module Speed
   include Receptacle::Repo
   mediate :a
@@ -29,7 +30,7 @@ module Speed
         args
       end
 
-      def after_a(return_values, _)
+      def after_a(return_values, _args)
         return_values
       end
 
@@ -37,7 +38,7 @@ module Speed
         args
       end
 
-      def after_f(return_values, _)
+      def after_f(return_values, _args)
         return_values
       end
     end
@@ -48,7 +49,7 @@ module Speed
         args
       end
 
-      def after_a(return_values, _)
+      def after_a(return_values, _args)
         return_values
       end
 
@@ -57,7 +58,7 @@ module Speed
         args
       end
 
-      def after_b(return_values, _)
+      def after_b(return_values, _args)
         return_values
       end
     end
@@ -72,11 +73,11 @@ module Speed
     end
 
     class W4
-      def after_a(return_values, _)
+      def after_a(return_values, _args)
         return_values
       end
 
-      def after_d(return_value, _)
+      def after_d(return_value, _args)
         return_value
       end
     end
@@ -86,13 +87,13 @@ module Speed
         args
       end
 
-      def after_c(return_value, _)
+      def after_c(return_value, _args)
         return_value
       end
     end
 
     class W6
-      def after_b(return_value, _)
+      def after_b(return_value, _args)
         return_value
       end
 

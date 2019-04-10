@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Receptacle
   # Cache describing which strategy and wrappers need to be applied for this method
   # @api private
@@ -16,7 +17,7 @@ module Receptacle
     # @return [Integer] arity of strategy method according to https://ruby-doc.org/core-2.3.3/Method.html#method-i-arity
     attr_reader :arity
 
-    def initialize(method_name:, strategy:, wrappers:) # rubocop:disable Metrics/AbcSize
+    def initialize(method_name:, strategy:, wrappers:)
       @strategy = strategy
       @before_method_name = :"before_#{method_name}"
       @after_method_name = :"after_#{method_name}"

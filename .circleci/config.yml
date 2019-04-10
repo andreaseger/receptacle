@@ -9,7 +9,7 @@ common_steps: &common_steps
   - checkout
   - run: gem update --system
   - restore_cache:
-    key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
+      key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
   - run:
       name: install dependencies
       command: |
@@ -19,10 +19,9 @@ common_steps: &common_steps
       key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
       paths:
         - vendor/bundle
-  - run: '[ ! -z $DANGER_GITHUB_API_TOKEN ] && bundle exec danger || echo "Skipping Danger for External Contributor"'
-  # run tests!
+  - run: bundle exec danger
   - run: bundle exec rake test
-
+  
 jobs:
   ruby-2.4:
     docker:
