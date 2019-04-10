@@ -1,6 +1,7 @@
 # frozen_string_literal: true
-require 'singleton'
-require 'set'
+
+require "singleton"
+require "set"
 module Receptacle
   # keeps global state of repositories, the defined strategy, set wrappers and methods to mediate
   class Registration

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'receptacle'
+
+require "receptacle"
 
 module Fixtures
   def self.callstack
@@ -91,7 +92,7 @@ module Fixtures
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
         @state = string.length
-        { string: string + '_wat' }
+        { string: string + "_wat" }
       end
 
       # :c
@@ -111,7 +112,7 @@ module Fixtures
       # :c
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        { string: string + '_foo' }
+        { string: string + "_foo" }
       end
     end
 
@@ -131,13 +132,13 @@ module Fixtures
       # :c
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        { string: string + '_bar' }
+        { string: string + "_bar" }
       end
 
       # :d
       def before_d(context:)
         Fixtures.callstack.push([self.class, __method__, context])
-        { context: context + '_bar' }
+        { context: context + "_bar" }
       end
 
       def before_e(first, second)
@@ -162,13 +163,13 @@ module Fixtures
       # :c
       def after_c(return_value, string:)
         Fixtures.callstack.push([self.class, __method__, string, return_value])
-        return_value + '_foobar'
+        return_value + "_foobar"
       end
 
       # :d
       def after_d(return_value, context:)
         Fixtures.callstack.push([self.class, __method__, context, return_value])
-        return_value + '_foobar'
+        return_value + "_foobar"
       end
 
       def after_e(return_value, first, second)

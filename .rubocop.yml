@@ -1,5 +1,9 @@
+require: rt_rubocop_defaults
+
 AllCops:
-  TargetRubyVersion: 2.1
+  TargetRubyVersion: 2.4
+  Exclude:
+    - Dangerfile
 
 Metrics/LineLength:
   Max: 99
@@ -21,6 +25,3 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Exclude:
     - test/*
-
-Style/Documentation:
-  Enabled: false

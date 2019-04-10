@@ -4,6 +4,13 @@ Changelog
 master
 ---
 
+1.0.0
+---
+
+* repackage 0.3.1 as 1.0.0
+* setup circleci
+* drop ruby < 2.4
+
 
 0.3.1
 ---
