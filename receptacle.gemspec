@@ -24,12 +24,12 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler', '~> 1.13'
+  spec.add_development_dependency 'bundler', '>= 1.13', '< 3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'rubocop_runner', '~> 2.0'
-  spec.add_development_dependency 'rubocop', '~> 0.46.0'
+  spec.add_development_dependency 'rt_rubocop_defaults', '>= 1.0.2', '< 2'
   spec.add_development_dependency 'simplecov', '~> 0.13'
   spec.add_development_dependency 'codecov'
   spec.add_development_dependency 'guard'
