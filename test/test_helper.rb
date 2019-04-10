@@ -2,7 +2,7 @@
 
 unless RUBY_PLATFORM == "java"
   require "simplecov"
-  if ENV["TRAVIS"]
+  if ENV["CIRCLECI"]
     require "codecov"
     SimpleCov.formatter SimpleCov::Formatter::Codecov
   end
