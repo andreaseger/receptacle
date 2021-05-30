@@ -19,7 +19,6 @@ common_steps: &common_steps
       key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
       paths:
         - vendor/bundle
-  - run: bundle exec danger
   - run: bundle exec rake test
   
 jobs:
@@ -36,6 +35,16 @@ jobs:
   ruby-2.6:
     docker:
       - image: circleci/ruby:2.6
+    steps:
+      *common_steps
+  ruby-2.7:
+    docker:
+      - image: circleci/ruby:2.6
+    steps:
+      *common_steps
+  ruby-3.0:
+    docker:
+      - image: circleci/ruby:3.0
     steps:
       *common_steps
   jruby-9.2:
@@ -60,5 +69,7 @@ workflows:
       - ruby-2.4
       - ruby-2.5
       - ruby-2.6
+      - ruby-2.7
+      - ruby-3.0
       - jruby-9.2
       - jruby-9.2-indy

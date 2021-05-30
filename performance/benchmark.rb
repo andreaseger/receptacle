@@ -12,11 +12,11 @@ require_relative "speed_receptacle"
 
 Speed.strategy(Speed::Strategy::One)
 Speed.wrappers [Speed::Wrappers::W1,
-                Speed::Wrappers::W2,
-                Speed::Wrappers::W3,
-                Speed::Wrappers::W4,
-                Speed::Wrappers::W5,
-                Speed::Wrappers::W6]
+  Speed::Wrappers::W2,
+  Speed::Wrappers::W3,
+  Speed::Wrappers::W4,
+  Speed::Wrappers::W5,
+  Speed::Wrappers::W6]
 
 print "w/ wrappers"
 Benchmark.ips do |x|

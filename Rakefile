@@ -12,7 +12,4 @@ end
 require "rubocop/rake_task"
 RuboCop::RakeTask.new
 
-require "rubocop_runner/rake_task"
-RubocopRunner::RakeTask.new
-
 task default: :test

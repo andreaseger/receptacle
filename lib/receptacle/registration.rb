@@ -24,11 +24,9 @@ module Receptacle
     # this is needed to make strategy and wrappers changes inside the codebase possible
     def self.clear_method_cache(receptacle)
       instance.repositories[receptacle].methods.each do |method_name|
-        begin
-          receptacle.singleton_class.send(:remove_method, method_name)
-        rescue NameError
-          nil
-        end
+        receptacle.singleton_class.send(:remove_method, method_name)
+      rescue NameError
+        nil
       end
     end
   end

@@ -6,6 +6,7 @@ module Fixtures
   def self.callstack
     Thread.current[:receptacle_test_callstack] ||= []
   end
+
   module Test
     include Receptacle::Repo
     mediate :a
@@ -42,6 +43,7 @@ module Fixtures
         first + second
       end
     end
+
     class Two < One
       def a(number)
         Fixtures.callstack.push([self.class, __method__, number])
@@ -92,7 +94,7 @@ module Fixtures
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
         @state = string.length
-        { string: string + "_wat" }
+        {string: string + "_wat"}
       end
 
       # :c
@@ -112,7 +114,7 @@ module Fixtures
       # :c
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        { string: string + "_foo" }
+        {string: string + "_foo"}
       end
     end
 
@@ -132,13 +134,13 @@ module Fixtures
       # :c
       def before_c(string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        { string: string + "_bar" }
+        {string: string + "_bar"}
       end
 
       # :d
       def before_d(context:)
         Fixtures.callstack.push([self.class, __method__, context])
-        { context: context + "_bar" }
+        {context: context + "_bar"}
       end
 
       def before_e(first, second)

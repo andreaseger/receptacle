@@ -16,7 +16,7 @@ module Receptacle
 
       Registration.repositories[self].methods << method_name
     end
-    alias delegate_to_strategy mediate
+    alias_method :delegate_to_strategy, :mediate
 
     # get or sets the strategy
     #

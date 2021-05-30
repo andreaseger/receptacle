@@ -14,11 +14,11 @@ require_relative "speed_receptacle"
 
 Speed.strategy(Speed::Strategy::One)
 Speed.wrappers [Speed::Wrappers::W1,
-                Speed::Wrappers::W2,
-                Speed::Wrappers::W3,
-                Speed::Wrappers::W4,
-                Speed::Wrappers::W5,
-                Speed::Wrappers::W6]
+  Speed::Wrappers::W2,
+  Speed::Wrappers::W3,
+  Speed::Wrappers::W4,
+  Speed::Wrappers::W5,
+  Speed::Wrappers::W6]
 Speed.a(1)
 Speed.b(1)
 Speed.c(1)
@@ -34,7 +34,7 @@ end
 
 profile_printer = JRuby::Profiler::GraphProfilePrinter.new(profile_data)
 profile_printer.printProfile(File.open("#{PROFILE_NAME}.graph.profile", "w+"))
-profile_printer.printProfile(STDOUT)
+profile_printer.printProfile($stdout)
 
 profile_printer = JRuby::Profiler::FlatProfilePrinter.new(profile_data)
 profile_printer.printProfile(File.open("#{PROFILE_NAME}.flat.profile", "w+"))
