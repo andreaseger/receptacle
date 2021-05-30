@@ -4,6 +4,14 @@ Changelog
 master
 ---
 
+2.0.0
+---
+* Support for ruby 3
+* The wrapper interface has been redesigned
+
+See [Upgrade notes](./upgrade_notes.md) on how to upgrade from version 1.0
+
+
 1.0.0
 ---
 
@@ -39,4 +47,3 @@ master
 ---
 
 * initial release
-

@@ -4,7 +4,7 @@
 require "bundler/inline"
 gemfile true do
   source "https://rubygems.org"
-  gem "receptacle", "~>0.3"
+  gem "receptacle", "~> 2"
   gem "mongo"
 end
 require "irb"
@@ -46,7 +46,7 @@ module Repository
       class Mongo
         def find(id:)
           mongo_to_model(collection.find(_id: id).first)
-        rescue StandardError
+        rescue
           nil
         end
 

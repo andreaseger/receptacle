@@ -82,14 +82,14 @@ Optionally wrapper classes can be defined
 ```ruby
 module Wrapper
   class Validator
-    def before_find(id:)
+    def find(id:)
       raise ArgumentError if id.nil?
-      {id: id}
+      yield(id: id)
     end
   end
   class ModelMapper
-    def after_find(return_value, **_kwargs)
-      Model::User.new(return_value)
+    def find(id:)
+      Model::User.new(yield(id: id))
     end
   end
 end
@@ -122,13 +122,14 @@ module Repository
 
     module Wrapper
       class Validator
-        def before_find(id:)
+        def find(id:)
           raise ArgumentError if id.nil?
-          {id: id}
+          yield(id: id)
         end
       end
       class ModelMapper
-        def after_find(return_value, **_kwargs)
+        def find(id:)
+          return_value = yield(id: id)
           Model::User.new(return_value)
         end
       end
@@ -225,47 +226,28 @@ applying them in the business logic by using wrappers.
 
 One or multiple wrappers sit logically between the repository and the
 strategies. Based on the repository configuration it knows when and in which
-order they should be applied. Right now there is support for 2 1/2 types of
-actions.
-
-1. a _before_ method action: This action is called before the final strategy
-   method is executed. It has access to the method parameter and can even modify
-   them.
-2. a _after_ method action: This action is called after the strategy method was
-   executed and has access to the method parameters passed to the strategy
-   method and the return value. The return value could be modified here too.
-
-The extra 1/2 action type is born by the fact that if a single wrapper class
-implements both an before and after action for the same method the same wrapper
-instance is used to execute both. Although this doesn't cover the all use cases
-an _around_ method action would but many which need state before and after the
-data source is accessed are covered.
+order they should be applied. 
 
 #### Implementation
 
 Wrapper actions are implemented as plain ruby classes which provide instance
-methods named like `before_<method_name>` or `after_<method_name>` where
-`<method_name>` is the repository/strategy method this action should be applied
-to.
+methods named like the method that the repository/strategy method this action should be applied to.
 
 ```ruby
 module Wrapper
   class Validator
-    def before_find(id:)
+    def find(id:)
       raise ArgumentError if id.nil?
-      {id: id}
+      yield(id: id)
     end
   end
 end
 ```
 
-This wrapper class would provide a before action for the `find` method. The
-return value of this wrapper will be used as parameters for the strategy method
-(or the next wrapper in line). Keyword arguments can simply be returned as hash.
-
-If multiple wrapper classes are defined the before wrapper actions are executed
-in the order the wrapper classes are defined while the after actions are applied
-in reverse order.
+This wrapper class would execute on any `find` call. You can use it to execute code
+before or after the next wrapper/strategy is called. Calling `yield` executes the next
+wrapper in line or the strategy, if this is the last wrapper that is called. The return
+value is passed down to the previous wrapper and in the end to the repository caller.
 
 ### Memory Strategy
 
@@ -315,8 +297,8 @@ Some alternative have some interesting features nevertheless:
   
 This gem on the other hand makes absolutely no assumptions about your data
 source or general structure of your code. It can be simply plugged in between
-your business logic and data source to abstract the two. Of cause like the other
-repository pattern implementations strategy details should be hidden from the
+your business logic and data source to abstract the two. Of course, like the other
+repository pattern implementations, strategy details should be hidden from the
 interface. The data source can essentially be anything. A SQL database, a no-SQL
 database, a JSON API or even a gem. Placing a gem behind a repository can be
 useful if you're not yet sure this is the correct or best possible gem,
@@ -327,15 +309,11 @@ this by giving all the different http libraries a common interface).
 
 A module called `TestSupport` can be found
 [here](https://github.com/andreaseger/receptacle/blob/master/lib/receptacle/test_support.rb).
-Right now it provides 2 helper methods `with_strategy` to easily toggle
-temporarily to another strategy and `ensure_method_delegators` to solve issues
-caused by Rspec when attempting to stub a repository method. Both methods and
-how to use them is described in more detail in the inline documentation. 
+Right now it provides a helper method `with_strategy` to easily toggle temporarily to another strategy. How to use it is described in more detail in the inline documentation. 
 
 ## Goals of this implementation
 
 - small core codebase
-- minimal processing overhead - fast method dispatching
 - flexible - all kind of methods should possible to be mediated
 - basic but powerful callbacks/hooks/observer possibilities
 

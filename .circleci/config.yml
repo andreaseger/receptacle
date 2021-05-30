@@ -1,64 +1,40 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
 
-version: 2
+# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
+# See: https://circleci.com/docs/2.0/orb-intro/
+orbs:
+  ruby: circleci/ruby@1.4.0
 
-common_steps: &common_steps
-  - checkout
-  - run: gem update --system
-  - restore_cache:
-      key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
-  - run:
-      name: install dependencies
-      command: |
-        gem update bundler
-        bundle install --jobs=4 --retry=3 --path vendor/bundle
-  - save_cache:
-      key: gem-cache-{{ .Branch }}-{{ checksum "Gemfile" }}
-      paths:
-        - vendor/bundle
-  - run: bundle exec danger
-  - run: bundle exec rake test
-  
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  ruby-2.4:
+  test:
+    parameters:
+      ruby_version:
+        type: string
     docker:
-      - image: circleci/ruby:2.4
+      - image: cimg/base:stable
     steps:
-      *common_steps
-  ruby-2.5:
-    docker:
-      - image: circleci/ruby:2.5
-    steps:
-      *common_steps
-  ruby-2.6:
-    docker:
-      - image: circleci/ruby:2.6
-    steps:
-      *common_steps
-  jruby-9.2:
-    docker:
-      - image: circleci/jruby:9.2
-    environment:
-      JRUBY_OPTS: '--dev'
-    steps:
-      *common_steps
-  jruby-9.2-indy:
-    docker:
-      - image: circleci/jruby:9.2
-    environment:
-      JRUBY_OPTS: '-Xcompile.invokedynamic=true'
-    steps:
-      *common_steps
+      - ruby/install:
+          version: << parameters.ruby_version >>
+      - checkout
+      - run: gem install bundler
+      - run: bundle install
+      - ruby/rspec-test
 
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  version: 2
-  build:
+  test: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - ruby-2.4
-      - ruby-2.5
-      - ruby-2.6
-      - jruby-9.2
-      - jruby-9.2-indy
+      - test: 
+          matrix:
+            parameters:
+              ruby_version:
+                - "2.7"
+                - "3.0"
+                - "3.1.2"
+                - "jruby-9.3.9.0"
