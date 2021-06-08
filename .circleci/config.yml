@@ -22,11 +22,6 @@ common_steps: &common_steps
   - run: bundle exec rake test
   
 jobs:
-  ruby-2.4:
-    docker:
-      - image: circleci/ruby:2.4
-    steps:
-      *common_steps
   ruby-2.5:
     docker:
       - image: circleci/ruby:2.5
@@ -39,7 +34,7 @@ jobs:
       *common_steps
   ruby-2.7:
     docker:
-      - image: circleci/ruby:2.6
+      - image: circleci/ruby:2.7
     steps:
       *common_steps
   ruby-3.0:
@@ -66,7 +61,6 @@ workflows:
   version: 2
   build:
     jobs:
-      - ruby-2.4
       - ruby-2.5
       - ruby-2.6
       - ruby-2.7
