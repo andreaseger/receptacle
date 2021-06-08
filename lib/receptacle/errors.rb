@@ -9,6 +9,7 @@ module Receptacle
         super("Missing Configuration for repository: <#{repo}>")
       end
     end
+
     class ReservedMethodName < StandardError; end
   end
 end

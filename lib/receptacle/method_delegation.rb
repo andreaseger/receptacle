@@ -43,8 +43,8 @@ module Receptacle
       raise Errors::NotConfigured.new(repo: self) if config.strategy.nil?
 
       MethodCache.new(
-        strategy:    config.strategy,
-        wrappers:    config.wrappers,
+        strategy: config.strategy,
+        wrappers: config.wrappers,
         method_name: method_name
       )
     end
@@ -110,10 +110,10 @@ module Receptacle
         next unless wrapper.respond_to?(method_name)
 
         args = if high_arity
-                 wrapper.public_send(method_name, *args)
-               else
-                 wrapper.public_send(method_name, args)
-               end
+          wrapper.public_send(method_name, *args)
+        else
+          wrapper.public_send(method_name, args)
+        end
       end
       args
     end
@@ -130,10 +130,10 @@ module Receptacle
         next unless wrapper.respond_to?(method_name)
 
         return_value = if high_arity
-                         wrapper.public_send(method_name, return_value, *args)
-                       else
-                         wrapper.public_send(method_name, return_value, args)
-                       end
+          wrapper.public_send(method_name, return_value, *args)
+        else
+          wrapper.public_send(method_name, return_value, args)
+        end
       end
       return_value
     end

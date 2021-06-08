@@ -15,12 +15,12 @@ module Speed
       def a(arg)
         arg
       end
-      alias b a
-      alias c a
-      alias d a
-      alias e a
-      alias f a
-      alias g a
+      alias_method :b, :a
+      alias_method :c, :a
+      alias_method :d, :a
+      alias_method :e, :a
+      alias_method :f, :a
+      alias_method :g, :a
     end
   end
 
@@ -62,6 +62,7 @@ module Speed
         return_values
       end
     end
+
     class W3
       def before_a(args)
         args
