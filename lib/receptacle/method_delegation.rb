@@ -3,15 +3,14 @@
 require "receptacle/method_cache"
 require "receptacle/registration"
 require "receptacle/errors"
-
 module Receptacle
   # module which enables a repository to mediate methods dynamically to wrappers and strategy
   # @api private
   module MethodDelegation
     # dynamically build mediation method on first invocation if the method is registered
-    def method_missing(method_name, *arguments, &block)
+    def method_missing(method_name, *args, **kwargs, &block)
       if Registration.repositories[self].methods.include?(method_name)
-        public_send(__build_method(method_name), *arguments, &block)
+        public_send(__build_method(method_name), *args, **kwargs, &block)
       else
         super
       end
@@ -27,8 +26,6 @@ module Receptacle
       method_cache = __build_method_call_cache(method_name)
       if method_cache.wrappers.nil? || method_cache.wrappers.empty?
         __define_shortcut_method(method_cache)
-      elsif method_cache.arity.abs > 1
-        __define_full_method_high_arity(method_cache)
       else
         __define_full_method(method_cache)
       end
@@ -53,29 +50,18 @@ module Receptacle
     # @param method_cache [MethodCache] method_cache of the method to be build
     # @return [void]
     def __define_shortcut_method(method_cache)
-      define_singleton_method(method_cache.method_name) do |*args, &inner_block|
-        method_cache.strategy.new.public_send(method_cache.method_name, *args, &inner_block)
+      define_singleton_method(method_cache.method_name) do |*args, **kwargs, &inner_block|
+        method_cache.strategy.new.public_send(method_cache.method_name, *args, **kwargs, &inner_block)
       end
     end
 
-    # build method to mediate method calls of arity 1 to strategy with full wrapper support
+    # build method to mediate method calls of high arity to strategy with full wrapper support
     # @param method_cache [MethodCache] method_cache of the method to be build
     # @return [void]
     def __define_full_method(method_cache)
-      define_singleton_method(method_cache.method_name) do |*args, &inner_block|
-        __run_wrappers(method_cache, *args) do |*call_args|
-          method_cache.strategy.new.public_send(method_cache.method_name, *call_args, &inner_block)
-        end
-      end
-    end
-
-    # build method to mediate method calls of higher arity to strategy with full wrapper support
-    # @param method_cache [MethodCache] method_cache of the method to be build
-    # @return [void]
-    def __define_full_method_high_arity(method_cache)
-      define_singleton_method(method_cache.method_name) do |*args, &inner_block|
-        __run_wrappers(method_cache, args, true) do |*call_args|
-          method_cache.strategy.new.public_send(method_cache.method_name, *call_args, &inner_block)
+      define_singleton_method(method_cache.method_name) do |*args, **kwargs, &inner_block|
+        __run_wrappers(method_cache, args, kwargs) do |*call_args, **kwargs|
+          method_cache.strategy.new.public_send(method_cache.method_name, *call_args, **kwargs, &inner_block)
         end
       end
     end
@@ -85,18 +71,17 @@ module Receptacle
     # @param input_args input parameter of the repository method call
     # @param high_arity [Boolean] if are intended for a higher arity method
     # @return strategy method return value after all wrappers where applied
-    def __run_wrappers(method_cache, input_args, high_arity = false)
+    def __run_wrappers(method_cache, input_args, kwargs)
       wrappers = method_cache.wrappers.map(&:new)
-      args =
-        if method_cache.skip_before_wrappers?
-          input_args
-        else
-          __run_before_wrappers(wrappers, method_cache.before_method_name, input_args, high_arity)
-        end
-      ret = high_arity ? yield(*args) : yield(args)
+      all_args = { args: input_args, kwargs: kwargs}
+      unless method_cache.skip_before_wrappers?
+        all_args = __run_before_wrappers(wrappers, method_cache.before_method_name, all_args)
+      end
+
+      ret = yield(*(all_args[:args]), **(all_args[:kwargs]))
       return ret if method_cache.skip_after_wrappers?
 
-      __run_after_wrappers(wrappers, method_cache.after_method_name, args, ret, high_arity)
+      __run_after_wrappers(wrappers, method_cache.after_method_name, all_args, ret)
     end
 
     # runtime method to execute all before wrappers
@@ -105,17 +90,12 @@ module Receptacle
     # @param args input args of the repository method
     # @param high_arity [Boolean] if are intended for a higher arity method
     # @return processed method args by before wrappers
-    def __run_before_wrappers(wrappers, method_name, args, high_arity = false)
+    def __run_before_wrappers(wrappers, method_name, all_args)
       wrappers.each do |wrapper|
         next unless wrapper.respond_to?(method_name)
-
-        args = if high_arity
-          wrapper.public_send(method_name, *args)
-        else
-          wrapper.public_send(method_name, args)
-        end
+        all_args = wrapper.public_send(method_name, *(all_args[:args]), **all_args[:kwargs])
       end
-      args
+      all_args
     end
 
     # runtime method to execute all after wrappers
@@ -125,15 +105,10 @@ module Receptacle
     # @param return_value return value of strategy method
     # @param high_arity [Boolean] if are intended for a higher arity method
     # @return processed return value by all after wrappers
-    def __run_after_wrappers(wrappers, method_name, args, return_value, high_arity = false)
+    def __run_after_wrappers(wrappers, method_name, all_args, return_value)
       wrappers.reverse_each do |wrapper|
         next unless wrapper.respond_to?(method_name)
-
-        return_value = if high_arity
-          wrapper.public_send(method_name, return_value, *args)
-        else
-          wrapper.public_send(method_name, return_value, args)
-        end
+        return_value = wrapper.public_send(method_name, return_value, *all_args[:args], **all_args[:kwargs])
       end
       return_value
     end
