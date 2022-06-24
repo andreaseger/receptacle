@@ -4,6 +4,11 @@ Changelog
 master
 ---
 
+1.1.0
+---
+* support ruby 3
+
+
 1.0.0
 ---
 
@@ -39,4 +44,3 @@ master
 ---
 
 * initial release
-
