@@ -129,14 +129,14 @@ class ReceptacleTest < Minitest::Test
 
   def test_argument_passing_kwargs
     receptacle.strategy Fixtures::Strategy::One
-    assert_equal "ARGUMENT_PASSING", receptacle.c(string: "argument_passing")
+    assert_equal "ARGUMENT_PASSING", receptacle.c(10, string: "argument_passing")
     assert_equal [
       [Fixtures::Strategy::One, :c, "argument_passing"]
     ], callstack
     clear_callstack
 
     receptacle.wrappers [Fixtures::Wrapper::BeforeAandC]
-    assert_equal "TEST_FOO", receptacle.c(string: "test")
+    assert_equal "TEST_FOO", receptacle.c(10, string: "test")
     assert_equal [
       [Fixtures::Wrapper::BeforeAandC, :before_c, "test"],
       [Fixtures::Strategy::One, :c, "test_foo"]
@@ -193,10 +193,13 @@ class ReceptacleTest < Minitest::Test
     ], callstack
     clear_callstack
 
-    assert_equal "WRAPPER_foobar", receptacle.c(string: "wrapper")
+    assert_equal "WRAPPER_foobar", receptacle.c(10, string: "wrapper")
+    assert_equal "after_f + f_body", receptacle.f { "f_body"}
     assert_equal [
       [Fixtures::Strategy::Two, :c, "wrapper"],
-      [Fixtures::Wrapper::AfterAll, :after_c, "wrapper", "WRAPPER"]
+      [Fixtures::Wrapper::AfterAll, :after_c, "wrapper", "WRAPPER"],
+      [Fixtures::Strategy::Two, :f],
+      [Fixtures::Wrapper::AfterAll, :after_f, "f_body"]
     ], callstack
     clear_callstack
 
@@ -242,7 +245,7 @@ class ReceptacleTest < Minitest::Test
   def test_call_order_after_setup_change
     receptacle.strategy Fixtures::Strategy::One
     receptacle.wrappers [Fixtures::Wrapper::BeforeAll, Fixtures::Wrapper::AfterAll]
-    assert_equal "BLA_BAR_foobar", receptacle.c(string: "bla")
+    assert_equal "BLA_BAR_foobar", receptacle.c(10, string: "bla")
     assert_equal [
       [Fixtures::Wrapper::BeforeAll, :before_c, "bla"],
       [Fixtures::Strategy::One, :c, "bla_bar"],
@@ -252,7 +255,7 @@ class ReceptacleTest < Minitest::Test
 
     receptacle.strategy Fixtures::Strategy::Two
     receptacle.wrappers [Fixtures::Wrapper::BeforeAll, Fixtures::Wrapper::BeforeAandC]
-    assert_equal "BLA_BAR_FOO", receptacle.c(string: "bla")
+    assert_equal "BLA_BAR_FOO", receptacle.c(10, string: "bla")
     assert_equal [
       [Fixtures::Wrapper::BeforeAll, :before_c, "bla"],
       [Fixtures::Wrapper::BeforeAandC, :before_c, "bla_bar"],
@@ -264,14 +267,14 @@ class ReceptacleTest < Minitest::Test
     receptacle.strategy Fixtures::Strategy::One
     receptacle.wrappers Fixtures::Wrapper::BeforeAfterWithStateC
 
-    assert_equal "WOHOO_WAT5", receptacle.c(string: "wohoo")
+    assert_equal "WOHOO_WAT5", receptacle.c(10, string: "wohoo")
     assert_equal [
       [Fixtures::Wrapper::BeforeAfterWithStateC, :before_c, "wohoo"],
       [Fixtures::Strategy::One, :c, "wohoo_wat"],
       [Fixtures::Wrapper::BeforeAfterWithStateC, :after_c, "wohoo_wat", "WOHOO_WAT"]
     ], callstack
 
-    assert_equal "NEW_STATE_WAT9", receptacle.c(string: "new_state")
+    assert_equal "NEW_STATE_WAT9", receptacle.c(10, string: "new_state")
   end
 
   def test_after_wrapper_order
@@ -296,15 +299,15 @@ class ReceptacleTest < Minitest::Test
 
     t1 = Thread.new do
       latch.wait
-      assert_equal "T1_WAT2", receptacle.c(string: "t1")
+      assert_equal "T1_WAT2", receptacle.c(10, string: "t1")
     end
     t2 = Thread.new do
       latch.wait
-      assert_equal "T2_WAT2", receptacle.c(string: "t2")
+      assert_equal "T2_WAT2", receptacle.c(10, string: "t2")
     end
     t3 = Thread.new do
       latch.wait
-      assert_equal "T3_WAT2", receptacle.c(string: "t3")
+      assert_equal "T3_WAT2", receptacle.c(10, string: "t3")
     end
 
     latch.count_down

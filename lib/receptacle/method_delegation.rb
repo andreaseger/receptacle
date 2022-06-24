@@ -93,9 +93,26 @@ module Receptacle
     def __run_before_wrappers(wrappers, method_name, all_args)
       wrappers.each do |wrapper|
         next unless wrapper.respond_to?(method_name)
-        all_args = wrapper.public_send(method_name, *(all_args[:args]), **all_args[:kwargs])
+
+        if all_args[:args].empty? && all_args[:kwargs].empty?
+          wrapper.public_send(method_name)
+        elsif all_args[:args].empty?
+          ret = wrapper.public_send(method_name, **all_args[:kwargs])
+          all_args[:kwargs] = ret
+        else
+          ret = wrapper.public_send(method_name, *(all_args[:args]), **all_args[:kwargs])
+          all_args[:kwargs] = ret.pop if all_args[:kwargs].any?
+          all_args[:args] = ret.is_a?(Array) && !has_array_argument?(all_args[:args]) ? ret : [ret]
+        end
       end
       all_args
+    end
+
+    # @param method_name [#to_sym]
+    # @return [Boolean]
+    def has_array_argument?(args)
+      args.each { |arg| return true if arg.is_a?(Array) }
+      false
     end
 
     # runtime method to execute all after wrappers

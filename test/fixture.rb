@@ -14,6 +14,7 @@ module Fixtures
     mediate :c
     mediate :d
     mediate :e
+    mediate :f
   end
 
   module Strategy
@@ -28,7 +29,7 @@ module Fixtures
         array.reduce(:+)
       end
 
-      def c(string:)
+      def c(a, string:)
         Fixtures.callstack.push([self.class, __method__, string])
         string.upcase
       end
@@ -41,6 +42,11 @@ module Fixtures
       def e(first, second)
         Fixtures.callstack.push([self.class, __method__, [first, second]])
         first + second
+      end
+
+      def f
+        Fixtures.callstack.push([self.class, __method__])
+        yield
       end
     end
 
@@ -91,14 +97,14 @@ module Fixtures
 
     class BeforeAfterWithStateC
       # :c
-      def before_c(string:)
+      def before_c(a, string:)
         Fixtures.callstack.push([self.class, __method__, string])
         @state = string.length
-        {string: string + "_wat"}
+        [a, {string: string + "_wat"}]
       end
 
       # :c
-      def after_c(return_value, string:)
+      def after_c(return_value, a, string:)
         Fixtures.callstack.push([self.class, __method__, string, return_value])
         return_value + @state.to_s
       end
@@ -112,9 +118,9 @@ module Fixtures
       end
 
       # :c
-      def before_c(string:)
+      def before_c(a, string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        {string: string + "_foo"}
+        [a, {string: string + "_foo"}]
       end
     end
 
@@ -132,9 +138,9 @@ module Fixtures
       end
 
       # :c
-      def before_c(string:)
+      def before_c(a, string:)
         Fixtures.callstack.push([self.class, __method__, string])
-        {string: string + "_bar"}
+        [a + 10, {string: string + "_bar"}]
       end
 
       # :d
@@ -147,6 +153,11 @@ module Fixtures
         Fixtures.callstack.push([self.class, __method__, [first, second]])
         [first + 5, second + 5]
       end
+
+      def before_f
+        Fixtures.callstack.push([self.class, __method__])
+        "before_f"
+      end
     end
 
     class AfterAll
@@ -156,14 +167,14 @@ module Fixtures
         return_value + 100
       end
 
-      # :a
+      # :b
       def after_b(return_value, array)
         Fixtures.callstack.push([self.class, __method__, array, return_value])
         return_value + 100
       end
 
       # :c
-      def after_c(return_value, string:)
+      def after_c(return_value, a, string:)
         Fixtures.callstack.push([self.class, __method__, string, return_value])
         return_value + "_foobar"
       end
@@ -177,6 +188,11 @@ module Fixtures
       def after_e(return_value, first, second)
         Fixtures.callstack.push([self.class, __method__, [first, second], return_value])
         return_value + 300
+      end
+
+      def after_f(return_value)
+        Fixtures.callstack.push([self.class, __method__, return_value])
+        "after_f + #{return_value}"
       end
     end
   end
