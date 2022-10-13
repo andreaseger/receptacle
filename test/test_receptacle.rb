@@ -18,9 +18,6 @@ class ReceptacleTest < Minitest::Test
   end
 
   def setup
-    Receptacle::Registration.repositories[receptacle].strategy = nil
-    Receptacle::Registration.repositories[receptacle].wrappers = []
-    Receptacle::Registration.clear_method_cache(receptacle)
     clear_callstack
   end
 
