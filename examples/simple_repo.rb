@@ -23,6 +23,7 @@ module Connection
       client[:users].delete_many # empty collection
     end
     attr_reader :client
+
     def self.client
       instance.client
     end
@@ -46,7 +47,7 @@ module Repository
       class Mongo
         def find(id:)
           mongo_to_model(collection.find(_id: id).first)
-        rescue
+        rescue StandardError
           nil
         end
 

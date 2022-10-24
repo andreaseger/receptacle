@@ -219,4 +219,3 @@ describe Receptacle::Repo do
     end
   end
 end
-

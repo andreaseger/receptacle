@@ -27,17 +27,16 @@ module Receptacle
         end
       end
 
+      private
+
       def with_wrappers(wrappers, method_name, *args, **kwargs, &block)
         next_wrapper = wrappers.shift
-        if next_wrapper
-          wrapper_instance = next_wrapper.new
-          if wrapper_instance.respond_to?(method_name)
-            wrapper_instance.public_send(method_name, *args, **kwargs) do |*sub_args, **sub_kwargs|
-              with_wrappers(wrappers, method_name, *sub_args, **sub_kwargs, &block)
-            end
-          else
-            with_wrappers(wrappers, method_name, *args, **kwargs, &block)
+        if next_wrapper&.method_defined?(method_name)
+          next_wrapper.new.public_send(method_name, *args, **kwargs) do |*sub_args, **sub_kwargs|
+            with_wrappers(wrappers, method_name, *sub_args, **sub_kwargs, &block)
           end
+        elsif next_wrapper
+          with_wrappers(wrappers, method_name, *args, **kwargs, &block)
         else
           yield(*args, **kwargs)
         end
