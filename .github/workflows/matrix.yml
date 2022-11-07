@@ -18,12 +18,11 @@ jobs:
       matrix:
         os: [ubuntu]
         ruby:
-        - ruby-2.4
-        - ruby-2.5
+        # - ruby-2.4
+        # - ruby-2.5
         - ruby-2.6
         - ruby-2.7
         - jruby-9.3.9.0
-        - jruby-head
     continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
     steps:
       - uses: actions/checkout@v3
@@ -33,4 +32,4 @@ jobs:
           bundler-cache: true
       - run: bundle install
       - run: bundle exec rake test
-      - run: rubocop
+      # - run: bundle exec rubocop
