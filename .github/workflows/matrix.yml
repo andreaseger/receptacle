@@ -30,6 +30,5 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: bundle install
       - run: bundle exec rake test
       # - run: bundle exec rubocop
