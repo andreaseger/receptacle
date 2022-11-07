@@ -4,6 +4,10 @@ Changelog
 master
 ---
 
+* switch CI to github actions
+* remove danger
+* remove codecov
+
 1.0.0
 ---
 

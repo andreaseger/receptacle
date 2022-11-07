@@ -23,6 +23,7 @@ module Connection
       client[:users].delete_many # empty collection
     end
     attr_reader :client
+
     def self.client
       instance.client
     end

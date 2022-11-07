@@ -2,8 +2,8 @@
 
 [![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
 [![Gem Downloads](https://img.shields.io/gem/dt/receptacle.svg)](https://rubygems.org/gems/receptacle)
-[![CircleCI](https://circleci.com/gh/andreaseger/receptacle.svg?style=svg)](https://circleci.com/gh/andreaseger/receptacle)
-[![codecov](https://codecov.io/gh/andreaseger/receptacle/branch/master/graph/badge.svg)](https://codecov.io/gh/andreaseger/receptacle)
+
+NOTE: Version 1.x of this gem won't work on ruby 3+ and is unlikely to be updated.
 
 ## About
 
@@ -315,7 +315,7 @@ Some alternative have some interesting features nevertheless:
   
 This gem on the other hand makes absolutely no assumptions about your data
 source or general structure of your code. It can be simply plugged in between
-your business logic and data source to abstract the two. Of cause like the other
+your business logic and data source to abstract the two. Of course like the other
 repository pattern implementations strategy details should be hidden from the
 interface. The data source can essentially be anything. A SQL database, a no-SQL
 database, a JSON API or even a gem. Placing a gem behind a repository can be

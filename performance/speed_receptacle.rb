@@ -62,6 +62,7 @@ module Speed
         return_values
       end
     end
+
     class W3
       def before_a(args)
         args
