@@ -6,7 +6,7 @@ module Receptacle
   # keeps global state of repositories, the defined strategy, set wrappers and methods to mediate
   class Registration
     include Singleton
-    Tuple = Struct.new(:strategy, :wrappers, :methods)
+    Tuple = Struct.new(:strategy, :wrappers, :methods) # rubocop:disable Lint/StructNewOverride
 
     attr_reader :repositories
 

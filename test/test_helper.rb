@@ -2,10 +2,6 @@
 
 unless RUBY_PLATFORM == "java"
   require "simplecov"
-  if ENV["CIRCLECI"]
-    require "codecov"
-    SimpleCov.formatter SimpleCov::Formatter::Codecov
-  end
   SimpleCov.start do
     add_filter "/test/"
   end

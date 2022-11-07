@@ -4,11 +4,13 @@ module Receptacle
   module Errors
     class NotConfigured < StandardError
       attr_reader :repo
+
       def initialize(repo:)
         @repo = repo
         super("Missing Configuration for repository: <#{repo}>")
       end
     end
+
     class ReservedMethodName < StandardError; end
   end
 end

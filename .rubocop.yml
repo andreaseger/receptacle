@@ -2,8 +2,7 @@ require: rt_rubocop_defaults
 
 AllCops:
   TargetRubyVersion: 2.4
-  Exclude:
-    - Dangerfile
+  SuggestExtensions: false
 
 Metrics/LineLength:
   Max: 99
