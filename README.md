@@ -3,7 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
 [![Gem Downloads](https://img.shields.io/gem/dt/receptacle.svg)](https://rubygems.org/gems/receptacle)
 
-NOTE: Version 1.x of this gem won't work on ruby 3+ and is unlikely to be updated.
+NOTE: Version 1.x of this gem won't work on ruby 3+ and is unlikely to be updated. An adapted future version 2+ of this will be maintained at [runtastic/receptacle](https://github.com/runtastic/receptacle).
 
 ## About
 
