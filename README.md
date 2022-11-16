@@ -3,14 +3,13 @@
 [![Gem Version](https://badge.fury.io/rb/receptacle.svg)](https://badge.fury.io/rb/receptacle)
 [![Gem Downloads](https://img.shields.io/gem/dt/receptacle.svg)](https://rubygems.org/gems/receptacle)
 
-NOTE: Version 1.x of this gem won't work on ruby 3+ and is unlikely to be updated.
 
 ## About
 
 Provides easy and fast means to use the repository pattern to create separation
 between your business logic and your data sources.
 
-Battle tested at [Runtastic](https://github.com/runtastic).
+The ownership of this project has been taken over from https://github.com/andreaseger/receptacle, where you can still find version 1.0
 
 ## Installation
 
@@ -354,15 +353,9 @@ to [rubygems.org](https://rubygems.org).
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/andreaseger/receptacle. This project is intended to be a safe,
+https://github.com/runtastic/receptacle. This project is intended to be a safe,
 welcoming space for collaboration, and contributors are expected to adhere to
 the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
-## Attribution
-
-[Runtastic][runtastic] is using the repository pattern extensively in its
-backend services and inspired the creation of this library. Nevertheless no code
-developed at [Runtastic][runtastic] was used in this library.
 
 ## License
 
